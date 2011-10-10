@@ -31,58 +31,93 @@ Dio::validate( $email,
 ****/
 class Dio
 {
+	// -----------------------------------
 	static $default_charset = 'UTF-8';
+	// -----------------------------------
+	/** default_filters and default_verifies lists available filters, 
+	 *  their default parameters, and order to apply filters. 
+	 *  if filter is not listed in these default, it will be 
+	 *  applied at the end of the list. So, make sure your filters 
+	 *  are listed in default_filters. 
+	 */
 	static $default_filters = 
 		array(
+			  'multiple'    => FALSE,
 			  'noNull'      => TRUE,
 			  'encoding'    => 'UTF-8',
+			  'jaKatakana'  => 'standard', 
 			  'sanitize'    => FALSE,
-			  'tolower'     => FALSE,
-			  'letterCase'  => FALSE,
+			  'date'        => FALSE,
+			  'time'        => FALSE,
+			  'string'      => FALSE,
 			  );
+	// -----------------------------------
+	/** same as default_filters but it lists verifiers. 
+	 */
 	static $default_verifies = 
 		array(
-			  'default'  => FALSE, // default is filter but put it at the beginning of verifies. 
-			  'required' => FALSE,
-			  'code'     => FALSE,
-			  'length' => FALSE,
-			  'regexp' => FALSE,
+			  'default'    => FALSE, // default is filter but put it at the beginning of verifies. 
+			  'required'   => FALSE,
+			  'code'       => FALSE,
+			  'length'     => FALSE,
+			  'regexp'     => FALSE,
+			  'number'     => FALSE,
+			  'range'      => FALSE,
+			  'checkdate'  => FALSE,
 			  );
+	// -----------------------------------
+	static $filter_options = array(
+		'lower'       => array( 'string',   'tolower' ),
+		'upper'       => array( 'string',   'toupper' ),
+		'capital'     => array( 'string',   'tocapital' ),
+		'regexp'      => array( 'regexp', 
+		                                    'ymd' => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+		                                    'ym'  => '[0-9]{4}-[0-9]{2}',
+		                                    'his' => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
+		                                    'hi'  => '[0-9]{2}:[0-9]{2}',
+											'code' => '[-_0-9a-zA-Z]*',
+							  ),
+		'number'      => array( 'regexp',   '[0-9]*', 
+							                'int'    => '[-]{0,1}[0-9]*',
+								            'float'  => '[-]{0,1}[.0-9]*', 
+							  ),
+		'jaKatakana'  => array( 'mbJaKana', 'standard' ),
+		'hankaku'     => array( 'mbJaKana', 'hankaku' ),
+		'hankana'     => array( 'mbJaKana', 'hankana' ),
+	);
 	
+	// -----------------------------------
 	static $filter_classes = array();
 	
+	// -----------------------------------
 	static $filters = array(
 		// example of filter setting.
 		'some type name' => 
 			array(
 				  'filter1 name' => array( 'option1' => 'value1', 'option2' => 'value2' ),
-				  'filter2 name' => TRUE,   // use filter3, no option.
+				  'filter2 name' => TRUE,   // use filter2, no option.
 				  'filter3 name' => FALSE,  // do not use filter3
 				  'filter4 name' => 'trim', // use function trim as filter4
 				  'filter5 name' => function( $val ){}, // use function. 
+				  'mbJaKana'     => TRUE, 
 				  ),
 		// filters for email type.
 		'email' => 
 			array(
 				  'sanitize' => FILTER_SANITIZE_EMAIL,
-				  'tolower'  => TRUE,
+				  'string'   => 'tolower',
 				  'required' => FALSE,
 				  'default'  => FALSE,
 				  ),
+		'date' =>
+			array(
+				'multiple'  => array( 'suffix' => array( 'd', 'm', 'y' ), 
+				                      'connector' => '-' 
+				                    ),
+				'regexp'    => 'date',
+				'checkdate' => TRUE,
+			),
 		);
-	// +--------------------------------------------------------------- +
-	/** validate a value in $data array. 
-	 */
-	function get( $data, $name, $type='text', $options=array(), &$error=NULL ) {
-		if( !isset( $data[ $name ] ) ) {
-			return FALSE;
-		}
-		$value = $data[ $name ];
-		if( !self::verify( $value, $type, $options, $error ) ) {
-			$value = FALSE;
-		}
-		return $value;
-	}
 	// +--------------------------------------------------------------- +
 	/** validate a value based on type. 
 	 *  filter-verify-value
@@ -90,20 +125,91 @@ class Dio
 	function verify( &$value, $type='text', $options=array(), &$error=NULL ) {
 		$filters = self::$filters[ $type ];
 		$filters = array_merge( $filters, $options );
-		return self::validate( $value, $filters, $options, $error );
+		return self::validate( $value, $filters, $error );
+	}
+	// +--------------------------------------------------------------- +
+	/** get a validated value in $data array. 
+	 */
+	function get( $data, $name, $type='text', $options=array(), &$error=NULL ) {
+		$filters = self::$filters[ $type ];
+		$filters = array_merge( $filters, $options );
+		$value = self::find( $data, $name, $filters );
+		if( !self::validate( $value, $options, $error ) ) {
+			$value = FALSE;
+		}
+		return $value;
+	}
+	// +--------------------------------------------------------------- +
+	/** get a validated value in $_REQUEST array. 
+	 */
+	function request( $name, $type='text', $options=array(), &$error=NULL, $data=NULL ) {
+		if( $data === NULL ) $data = $_REQUEST;
+		return Dio::get( $data, $name, $type, $options, $error );
+	}
+	// +--------------------------------------------------------------- +
+	/** find a value $name in an array, $data. 
+	 *  if multiple option is set, get as multiple value. 
+	 */
+	function find( $data, $name, $filters=FALSE ) {
+		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
+			$value = self::multiple( $data, $name, $filters[ 'multiple' ] )
+		}
+		else
+		if( isset( $data[ $name ] ) ) {
+			$value = $data[ $name ];
+		}
+		else {
+			$value = FALSE;
+		}
+		return $valeu;
+	}
+	// +--------------------------------------------------------------- +
+	/** a special method to obtain multiple value from a data. 
+	 *  not to be used like other filters. 
+	 */
+	function multiple( $data, $name, $option ) 
+	{
+		// get multiple value as specified by $option. 
+		// $option['suffix']={ $sfx1, $sfx2 }: list of suffix
+		// $option['connecter']='string': 
+		// $option['separator']='string': 
+		$sep = '_';
+		$con = '-';
+		if( isset( $option['separator'] ) ) {
+			$sep = $option['separator'];
+		}
+		if( isset( $option['connecter'] ) ) {
+			$con = $option['connecter'];
+		}
+		$found = array();
+		foreach( $option[ 'suffix' ] as $sfx ) {
+			$name_sfx = $name . $sep . $sfx;
+			if( !isset( $data[ $name_sfx ] ) ) {
+				$found[] = $data[ $name_sfx ];
+			}
+		}
+		if( empty( $found ) ) {
+			$found = FALSE;
+		}
+		else {
+			$found = implode( $con, $found );
+		}
+		return $found;
 	}
 	// +--------------------------------------------------------------- +
 	/** filter-verify-value
 	 */
-	function validate( &$value, $filters=array(), $options=array(), &$error ) 
+	function validate( &$value, $filters=array(), &$error ) 
 	{
 		$success = TRUE;
 		// build filter list. 
 		$filters = array_merge( static::$default_filters, static::$default_verifies, $options );
 		// filter/verify $value.
 		if( !empty( $filters )
-		foreach( $filters as $f_name -> $option ) {
+		foreach( $filters as $f_name -> $option ) 
+		{
 			if( $option === FALSE ) continue;
+			if( $f_name == 'multiple' ) continue;
 			$success &= self::filter( $value, $f_name, $option, $error, $loop );
 			if( $loop == 'break' ) break;
 		}
@@ -128,6 +234,47 @@ class Dio
 			return $success;
 		}
 		// -----------------------------------
+		// preprocess $option and $err_msg.
+		if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
+			$err_msg = $option[ 'err_msg' ];
+			unset( $option[ 'err_msg' ] );
+			if( count( $option ) == 1 ) { // reduce array to string.
+				foreach( $option as $opt ) {}
+				$option = $opt;
+			}
+		}
+		else {
+			$err_msg = "error@{$f_name}";
+		}
+		// -----------------------------------
+		// determine real $filter from $f_name and $option. 
+		if( !isset( self::$filter_options[ $f_name ] ) ) {
+			// simple case. $f_name is not listed in filter option. 
+			$filter = $f_name;
+		}
+		else 
+		if( !is_array( self::$filter_options[ $f_name ] ) ) {
+			// use different name in the filter list. 
+			$filter = self::$filter_options[ $f_name ];
+		}
+		else {
+			// or more complicated case if is an array...
+			// the first item is always the filter name. 
+			$filter = self::$filter_options[ $f_name ][0];
+			// now, get the option. 
+			if( !is_array( $option ) && 
+				isset( self::$filter_options[ $f_name ][ $option ] ) ) {
+				// use predefined option. 
+				$option = self::$filter_options[ $f_name ][ $option ];
+			}
+			else 
+			if( isset( self::$filter_options[ $f_name ][1] ) ) {
+				// use option in filter_potions...
+				$option = self::$filter_options[ $f_name ][1]
+			}
+			// use option as is. 
+		}
+		// -----------------------------------
 		// filter/verify value. 
 		if( is_callable( $option ) ) {
 			$success = call_user_func_array( $option, $value );
@@ -144,18 +291,13 @@ class Dio
 			}
 		}
 		if( !$success ) { // it's an error. set an error message in $error.
-			if( isset( $options[ 'err_msg' ] ) ) {
-				$error = $options[ 'err_msg' ];
-			}
-			else {
-				$error = "error@{$f_name}";
-			}
-			if( WORDY ) echo "<font color=red>verify failed( $value, $error, $f_name, $options );</font><br/>\n";
+			$error = $err_msg;
+			if( WORDY ) echo "<font color=red>verify failed( $value, $error, $f_name ), err_msg={$err_msg}</font><br/>\n";
 		}
 		return $success;
 	}
 	// +--------------------------------------------------------------- +
-	//  preset validator and filter's.
+	//  modify filter settings.
 	// +--------------------------------------------------------------- +
 	/**
 	 */
@@ -165,21 +307,29 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/**
 	 */
-	function setFilterMethods( $method ) {
-		static::$default_filters[] = $method;
+	function addFilterMethods( $name, $method ) {
+		static::$default_filters[ $name ] = $method;
 	}
 	// +--------------------------------------------------------------- +
 	/**
 	 */
-	function setVerifyMethods( $method ) {
-		static::$default_verifies[] = $method;
+	function addVerifyMethods( $name, $method ) {
+		static::$default_verifies[ $name ] = $method;
 	}
-	// +--------------------------------------------------------------- +	
+	// +--------------------------------------------------------------- +
+	/**
+	 */
+	function addFilterOptions( $name, $option ) {
+		static::$filter_options[ $name ] = $option;
+	}
+	// +--------------------------------------------------------------- +
+	//  preset validator and filter's.
+	// +--------------------------------------------------------------- +
 	/** verifies if required value has a value. 
 	 */
 	function required( $value, $option, &$loop=NULL ) 
 	{
-		if( have_value( $value ) ) { // have value. default is no use...
+		if( have_value( $value ) ) { // have value. must be OK...
 			return TRUE;
 		}
 		$required = FALSE;
@@ -229,8 +379,12 @@ class Dio
 	/** completely filters out if bad encoding. 
 	 */
 	function encoding( &$value, $option=array(), &$loop=NULL ) {
-		if( isset( $option[ 'charset' ] ) ) {
+		if( is_array( $option ) && isset( $option[ 'charset' ] ) ) {
 			$charset = $option[ 'charset' ];
+		}
+		else
+		if( have_value( $option ) ) {
+			$charset = $option;
 		}
 		else
 		if( mb_internal_encoding() ) {
