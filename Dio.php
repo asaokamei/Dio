@@ -5,11 +5,13 @@ use CenaDta\Dio\Verify as Verify;
 
 // sample code....
 
-Dio::get( $_POST, 'mail', 'email', 
+Dio::get( $_POST, 'user_mail', 'email', 
 	array(
 		'default'  => 'text@example.com',
 		'required' => TRUE,
-	), $error );
+		'string'   => 'lower',
+	)
+);
 
 Dio::verify( $email, 'email', 
 	array(
@@ -70,11 +72,12 @@ class Dio
 		'lower'       => array( 'string',   'tolower' ),
 		'upper'       => array( 'string',   'toupper' ),
 		'capital'     => array( 'string',   'tocapital' ),
+		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*' ),
 		'regexp'      => array( 'regexp', 
 		                                    'ymd' => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
 		                                    'ym'  => '[0-9]{4}-[0-9]{2}',
-		                                    'his' => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
-		                                    'hi'  => '[0-9]{2}:[0-9]{2}',
+		                                    'His' => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
+		                                    'Hi'  => '[0-9]{2}:[0-9]{2}',
 											'code' => '[-_0-9a-zA-Z]*',
 							  ),
 		'number'      => array( 'regexp',   '[0-9]*', 
@@ -151,12 +154,12 @@ class Dio
 	 *  if multiple option is set, get as multiple value. 
 	 */
 	function find( $data, $name, $filters=FALSE ) {
-		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
-			$value = self::multiple( $data, $name, $filters[ 'multiple' ] )
-		}
-		else
 		if( isset( $data[ $name ] ) ) {
 			$value = $data[ $name ];
+		}
+		else
+		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
+			$value = self::multiple( $data, $name, $filters[ 'multiple' ] )
 		}
 		else {
 			$value = FALSE;
@@ -210,7 +213,8 @@ class Dio
 		{
 			if( $option === FALSE ) continue;
 			if( $f_name == 'multiple' ) continue;
-			$success &= self::filter( $value, $f_name, $option, $error, $loop );
+			$success = self::filter( $value, $f_name, $option, $error, $loop );
+			if( $success === FALSE ) break;
 			if( $loop == 'break' ) break;
 		}
 		return $success;
@@ -229,7 +233,7 @@ class Dio
 				$error = array(); 
 			}
 			foreach( $value as $key => $val ) {
-				$success &= self::filter( $val, $error[$key], $f_name, $option );
+				$success &= self::filter( $value[$key], $f_name, $option, $error[$key], $loop );
 			}
 			return $success;
 		}
@@ -280,18 +284,26 @@ class Dio
 			$success = call_user_func_array( $option, $value );
 		}
 		else
-		if( method_exists( 'Dio', $f_name ) ) {
-			$success = Dio::$f_name( $value, $option, $loop );
+		if( method_exists( 'Dio', $filter ) ) {
+			$success = Dio::$filter( $value, $option, $loop );
 		}
 		else {
 			foreach( self::$filter_classes as $class ) {
-				if( method_exists( $class, $f_name ) ) {
-					$success = $class::$f_name( $value, $option );
+				if( method_exists( $class, $filter ) ) {
+					$success = $class::$filter( $value, $option );
 				}
 			}
 		}
 		if( !$success ) { // it's an error. set an error message in $error.
-			$error = $err_msg;
+			if( $err_msg ) { // use err_msg in option. 
+				$error = $err_msg;
+			}
+			else
+			if( $err_msg =  ) {
+			}
+			else { // use generic error message. 
+				$err_msg = "error@{$f_name}";
+			}
 			if( WORDY ) echo "<font color=red>verify failed( $value, $error, $f_name ), err_msg={$err_msg}</font><br/>\n";
 		}
 		return $success;
@@ -302,7 +314,7 @@ class Dio
 	/**
 	 */
 	function setFilterClass( $class ) {
-		static::$filter_classes[] = $class;
+		static::$filter_classes[] = array_merge( array( $class ), static::$filter_classes );
 	}
 	// +--------------------------------------------------------------- +
 	/**
