@@ -47,7 +47,7 @@ class Dio
 			  'multiple'    => FALSE,
 			  'noNull'      => TRUE,
 			  'encoding'    => 'UTF-8',
-			  'jaKatakana'  => 'standard', 
+			  'mbCheckKana' => 'standard', 
 			  'sanitize'    => FALSE,
 			  'date'        => FALSE,
 			  'time'        => FALSE,
@@ -73,11 +73,12 @@ class Dio
 		'upper'       => array( 'string',   'toupper' ),
 		'capital'     => array( 'string',   'tocapital' ),
 		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*' ),
-		'regexp'      => array( 'regexp', 
-		                                    'ymd' => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
-		                                    'ym'  => '[0-9]{4}-[0-9]{2}',
-		                                    'His' => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
-		                                    'Hi'  => '[0-9]{2}:[0-9]{2}',
+		'datetype'    => array( 'regexp', 
+		                                    'ymd'  => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+		                                    'ym'   => '[0-9]{4}-[0-9]{2}',
+		                                    'His'  => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
+		                                    'Hi'   => '[0-9]{2}:[0-9]{2}',
+		                                    'dt'   => '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}',
 											'code' => '[-_0-9a-zA-Z]*',
 							  ),
 		'number'      => array( 'regexp',   '[0-9]*', 
@@ -97,28 +98,64 @@ class Dio
 		// example of filter setting.
 		'some type name' => 
 			array(
-				  'filter1 name' => array( 'option1' => 'value1', 'option2' => 'value2' ),
-				  'filter2 name' => TRUE,   // use filter2, no option.
-				  'filter3 name' => FALSE,  // do not use filter3
-				  'filter4 name' => 'trim', // use function trim as filter4
-				  'filter5 name' => function( $val ){}, // use function. 
-				  'mbJaKana'     => TRUE, 
-				  ),
+				'filter1 name' => array( 'option1' => 'value1', 'option2' => 'value2' ),
+				'filter2 name' => TRUE,   // use filter2, no option.
+				'filter3 name' => FALSE,  // do not use filter3
+				'filter4 name' => 'trim', // use function trim as filter4
+				'filter5 name' => function( $val ){}, // use function. 
+				'mbJaKana'     => TRUE, 
+				),
 		// filters for email type.
 		'email' => 
 			array(
-				  'sanitize' => FILTER_SANITIZE_EMAIL,
-				  'string'   => 'tolower',
-				  'required' => FALSE,
-				  'default'  => FALSE,
-				  ),
+				'mbConvert'  => 'hankaku',
+				'sanitize'   => FILTER_SANITIZE_EMAIL,
+				'string'     => 'tolower',
+				'required'   => FALSE,
+				'default'    => FALSE,
+				),
+		'number'  =>
+			array(
+				'mbConvert'   => 'hankaku',
+				'mbCheckKana' => 'hankaku_only',
+				'number'      => TRUE,
+			),
+		'int'  =>
+			array(
+				'number'    => 'int',
+			),
+		'float'  =>
+			array(
+				'number'    => 'float',
+			),
 		'date' =>
 			array(
-				'multiple'  => array( 'suffix' => array( 'd', 'm', 'y' ), 
+				'multiple'  => array( 'suffix' => array( 'y', 'm', 'd' ), 
 				                      'connector' => '-' 
 				                    ),
-				'regexp'    => 'date',
+				'datetype'  => 'ymd',
 				'checkdate' => TRUE,
+			),
+		'ym' =>
+			array(
+				'multiple'  => array( 'suffix' => array( 'y', 'm' ),
+				                      'connector' => '-' 
+				                    ),
+				'datetype'  => 'ym',
+			),
+		'time' =>
+			array(
+				'multiple'  => array( 'suffix' => array( 'h', 'i', 's' ), 
+				                      'connector' => ':' 
+				                    ),
+				'datetype'  => 'His',
+			),
+		'datetime' =>
+			array(
+				'multiple'  => array( 'suffix'  => array( 'y', 'm', 'd', 'h', 'i', 's' ), 
+				                      'sformat' => '%04d-%02d-%02d %02d:%02d:%02d' 
+				                    ),
+				'datetype'  => 'dt',
 			),
 		);
 	// +--------------------------------------------------------------- +
@@ -176,8 +213,9 @@ class Dio
 		// $option['suffix']={ $sfx1, $sfx2 }: list of suffix
 		// $option['connecter']='string': 
 		// $option['separator']='string': 
-		$sep = '_';
-		$con = '-';
+		// $option['sformat']  = sprintf's format. overwrites connector.
+		$sep  = '_';
+		$con  = '-';
 		if( isset( $option['separator'] ) ) {
 			$sep = $option['separator'];
 		}
@@ -193,6 +231,11 @@ class Dio
 		}
 		if( empty( $found ) ) {
 			$found = FALSE;
+		}
+		else
+		if( isset( $option[ 'sformat' ] ) ) {
+			$option = array_merge( array( $option[ 'sformat' ], $found );
+			$found = call_user_func_array( 'sprintf', $option );
 		}
 		else {
 			$found = implode( $con, $found );
