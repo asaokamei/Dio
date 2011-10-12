@@ -40,10 +40,38 @@ class Filter
 	// +--------------------------------------------------------------- +
 	// VERIFIERS METHODS!!!
 	// +--------------------------------------------------------------- +
+	/** check if value is a code, number, alpahbets, and '-' & '_'.
+	 */
 	function code( $val, $option ) {
 		return self::regexp( $val, '[-_0-9a-zA-Z]*' );
 	}
 	// +--------------------------------------------------------------- +
+	/** check if date is a valid date with checkdate function. 
+	 *  assume date is in 'YYYY-MM-DD' format. 
+	 *  specify $option[ dbar ] (i.e. '/'.) if date is 'YYYY/MM/DD'. 
+	 */
+	function checkDate( $val, $option ) {
+		if( !have_value( $val ) return FALSE;
+		$dbar = '-';
+		if( isset( $option[ 'dbar' ] ) ) $dbar = $option[ 'dbar' ];
+		list( $year, $month, $day ) = explode( $dbar, $date );
+		if( have_value( $year ) && have_value( $month ) && have_value( $day ) ) {
+			return @checkdate( $month, $day, $year );
+		}
+		return FALSE;
+	}
+	// +--------------------------------------------------------------- +
+	/** checks for easy mail format. 
+	 */
+	function checkMail( $val, $option ) {
+		return self::regexp( $val, "[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]+" );
+	}
+	// +--------------------------------------------------------------- +
+	/** checks for length of character. 
+	 *  $option specifies the exact length of char if in numeric.
+	 *  $option[ min ] speficies the minimum length. 
+	 *  $option[ max ] speficies the maximum length. 
+	 */
 	function length( $val, $option ) {
 		$ok  = TRUE;
 		$len = strlen( $val );
@@ -63,6 +91,32 @@ class Filter
 		return $ok;
 	}
 	// +--------------------------------------------------------------- +
+	function range( $val, $option ) {
+		$ok  = TRUE;
+		if( !is_numeric( $val ) ) return FALSE;
+		if( isset( $option[ 'min' ] ) && $val < $option[ 'min' ] ) {
+			$ok = FALSE;
+		}
+		if( isset( $option[ 'max' ] ) && $val > $option[ 'max' ] ) {
+			$ok = FALSE;
+		}
+		if( isset( $option[ 'lt' ] ) && $val < $option[ 'lt' ] ) {
+			$ok = FALSE;
+		}
+		if( isset( $option[ 'gt' ] ) && $val > $option[ 'gt' ] ) {
+			$ok = FALSE;
+		}
+		if( isset( $option[ 'le' ] ) && $val <= $option[ 'le' ] ) {
+			$ok = FALSE;
+		}
+		if( isset( $option[ 'ge' ] ) && $val >= $option[ 'ge' ] ) {
+			$ok = FALSE;
+		}
+		return $ok;
+	}
+	// +--------------------------------------------------------------- +
+	/**
+	 */
 	function regexp( $val, $option ) {
 		return preg_match( "/$option/", $val );
 	}
@@ -133,29 +187,78 @@ class Filter
 	// +--------------------------------------------------------------- +
 }
 
-class FilterJa
+class FilterJa extends Filter
 {
 	// +--------------------------------------------------------------- +
 	function apply() {
 		Dio::setFilterClass( __CLASS__ );
 		Dio::setFilterMethods( 'mbConvert', TRUE );
-		Dio::setFilterMethods( 'hankaku',   FALSE );
+		Dio::setFilterMethods( 'mbCheckKana',   FALSE );
 		Dio::setFilterMethods( 'hankaku', FALSE );
 		Dio::setFilterMethods( 'hankaku', FALSE );
 		Dio::setFilterMethods( 'hankaku', FALSE );
 	}
 	// +--------------------------------------------------------------- +
-	function hankaku( $val, $option=array() ) {
-		return self::mbConvert( $val, 'hankaku' );
+	/** only zenkaku-katakana allowed. 
+	 */
+	function zenKanaOnly( $val, $option=array() ) {
+		return self::mbCheckKana( $val, 'zen_kana_only' );
 	}
 	// +--------------------------------------------------------------- +
+	/** only hankaku-katakana allowed. 
+	 */
+	function zenKanaOnly( $val, $option=array() ) {
+		return self::mbCheckKana( $val, 'han_kana_only' );
+	}
+	// +--------------------------------------------------------------- +
+	/** only zenkaku-hiragana allowed. 
+	 */
+	function zenKanaOnly( $val, $option=array() ) {
+		return self::mbCheckKana( $val, 'zen_hira_only' );
+	}
+	// +--------------------------------------------------------------- +
+	/** only hankaku allowed. 
+	 */
+	function zenKanaOnly( $val, $option=array() ) {
+		return self::mbCheckKana( $val, 'hankaku_only' );
+	}
+	// +--------------------------------------------------------------- +
+	/** checks for kana type. 
+	 */
+	function mbCheckKana( $val, $option=array() ) {
+        switch( $convert_str ) 
+        {
+            case 'zen_kana_only': // only zenkaku-katakana
+                $ereg_str = "^[　ー−‐ァ-ヶ]*$";
+                break;
+            case 'han_kana_only': // only hankaku-katakana
+                $ereg_str = "^[ -ヲ-゜]*$";
+                break;
+            case 'zen_hira_only': // only zenkaku-hiragana
+                $ereg_str = "^[　ー−‐ぁ-ん]*$";
+                break;
+            case 'hankaku_only': // only hankaku
+                $ereg_str = "^[ !-~]*$";
+                break;
+            default:
+                $ereg_str = "";
+                break;
+        }
+		if( $ereg_str ) {
+			return mb_ereg( "^{$ereg_expr}$", $value );
+		}
+		return TRUE;
+	}
+	// +--------------------------------------------------------------- +
+	/**
+	 */
 	function mbConvert( $val, $option=array() ) {
 		if( !$val ) return $val;
 		switch( $option ) {
 			case 'hankaku':		$str = 'ak';		break;
-			case 'han_kata':	$str = 'kh';		break;
+			case 'han_kana':	$str = 'kh';		break;
 			case 'zen_hira':	$str = 'HVc';		break;
-			case 'zen_kata':	$str = 'KVC';		break;
+			case 'zen_kana':	$str = 'KVC';		break;
 			default:			$str = 'ASV';		break;
 		}
         $val = mb_convert_kana( $val, $str );
