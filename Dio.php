@@ -84,22 +84,25 @@ class Dio
 		'lower'       => array( 'string',   'tolower' ),
 		'upper'       => array( 'string',   'toupper' ),
 		'capital'     => array( 'string',   'tocapital' ),
-		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*' ),
+		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*'
+		                                    'err_msg' => 'enter only number and alphabets; no blank',
+							  ),
 		'datetype'    => array( 'regexp', 
 		                                    'ymd'  => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
 		                                    'ym'   => '[0-9]{4}-[0-9]{2}',
 		                                    'His'  => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
 		                                    'Hi'   => '[0-9]{2}:[0-9]{2}',
 		                                    'dt'   => '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}',
-											'code' => '[-_0-9a-zA-Z]*',
 							  ),
 		'number'      => array( 'regexp',   '[0-9]*', 
 							                'int'    => '[-]{0,1}[0-9]*',
 								            'float'  => '[-]{0,1}[.0-9]*', 
+											'err_msg'=> 'entery a number',
 							  ),
 		'jaKatakana'  => array( 'mbJaKana', 'standard' ),
 		'hankaku'     => array( 'mbJaKana', 'hankaku' ),
 		'hankana'     => array( 'mbJaKana', 'hankana' ),
+		'checkMail'   => array( 'checkMail', 'err_msg' => 'not a valid email format', ),
 	);
 	
 	// -----------------------------------
@@ -126,6 +129,7 @@ class Dio
 				'string'     => 'tolower',
 				'required'   => FALSE,
 				'default'    => FALSE,
+				'checkMail'  => TRUE,
 				),
 		'number'  =>
 			array(
@@ -284,6 +288,10 @@ class Dio
 			// find error message.
 			if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
 				$err_msg = $option[ 'err_msg' ];
+				unset( $option[ 'err_msg' ] );
+				if( count( $option ) == 1 && isset( $option[0] ) ) {
+					$option = $option[0];
+				}
 			}
 			else
 			if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
