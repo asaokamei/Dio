@@ -99,6 +99,7 @@ class Dio
 		'jaKatakana'  => array( 'mbJaKana', 'standard' ),
 		'hankaku'     => array( 'mbJaKana', 'hankaku' ),
 		'hankana'     => array( 'mbJaKana', 'hankana' ),
+		'required'    => array( 'required', 'err_msg' => 'required field' ),
 	);
 	
 	// -----------------------------------
