@@ -117,6 +117,7 @@ class Dio
 				'mbJaKana'     => TRUE, 
 				),
 		// filters for email type.
+		'asis'  => array(),
 		'email' => 
 			array(
 				'mbConvert'  => 'hankaku',
@@ -173,7 +174,7 @@ class Dio
 	/** validate a value based on type. 
 	 *  filter-verify-value
 	 */
-	function verify( &$value, $type='text', $options=array(), &$error=NULL ) {
+	function verify( &$value, $type='asis', $options=array(), &$error=NULL ) {
 		$filters = self::$filters[ $type ];
 		$filters = array_merge( $filters, $options );
 		return self::validate( $value, $filters, $error );
@@ -181,7 +182,7 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $data array. 
 	 */
-	function get( $data, $name, $type='text', $options=array(), &$error=NULL ) {
+	function get( $data, $name, $type='asis', $options=array(), &$error=NULL ) {
 		$filters = self::$filters[ $type ];
 		$filters = array_merge( $filters, $options );
 		$value = self::find( $data, $name, $filters );
