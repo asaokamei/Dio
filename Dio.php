@@ -54,7 +54,6 @@ class Dio
 			  'time'        => FALSE,
 			  'string'      => FALSE,
 			  );
-	// -----------------------------------
 	/** same as default_filters but it lists verifiers. 
 	 */
 	static $default_verifies = 
@@ -85,7 +84,6 @@ class Dio
 		'upper'       => array( 'string',   'toupper' ),
 		'capital'     => array( 'string',   'tocapital' ),
 		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*'
-		                                    'err_msg' => 'enter only number and alphabets; no blank',
 							  ),
 		'datetype'    => array( 'regexp', 
 		                                    'ymd'  => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
@@ -97,12 +95,10 @@ class Dio
 		'number'      => array( 'regexp',   '[0-9]*', 
 							                'int'    => '[-]{0,1}[0-9]*',
 								            'float'  => '[-]{0,1}[.0-9]*', 
-											'err_msg'=> 'entery a number',
 							  ),
 		'jaKatakana'  => array( 'mbJaKana', 'standard' ),
 		'hankaku'     => array( 'mbJaKana', 'hankaku' ),
 		'hankana'     => array( 'mbJaKana', 'hankana' ),
-		'checkMail'   => array( 'checkMail', 'err_msg' => 'not a valid email format', ),
 	);
 	
 	// -----------------------------------
@@ -119,6 +115,7 @@ class Dio
 				'filter4 name' => 'trim', // use function trim as filter4
 				'filter5 name' => function( $val ){}, // use function. 
 				'mbJaKana'     => TRUE, 
+				'err_msg'      => 'error message here',
 				),
 		// filters for email type.
 		'asis'  => array(),
@@ -130,48 +127,61 @@ class Dio
 				'required'   => FALSE,
 				'default'    => FALSE,
 				'checkMail'  => TRUE,
+				'err_msg'    => 'not a valid email format',
 				),
 		'number'  =>
 			array(
 				'mbConvert'   => 'hankaku',
 				'mbCheckKana' => 'hankaku_only',
 				'number'      => TRUE,
+				'err_msg'     => 'enter a number',
 			),
 		'int'  =>
 			array(
-				'number'    => 'int',
+				'mbConvert'   => 'hankaku',
+				'number'      => 'int',
+				'err_msg'     => 'enter an integer',
 			),
 		'float'  =>
 			array(
-				'number'    => 'float',
+				'mbConvert'   => 'hankaku',
+				'number'      => 'float',
+				'err_msg'     => 'enter a float value',
 			),
 		'date' =>
 			array(
 				'multiple'  => array( 'suffix' => array( 'y', 'm', 'd' ), 
 				                      'connector' => '-' 
 				                    ),
+				'mbConvert' => 'hankaku',
 				'datetype'  => 'ymd',
 				'checkdate' => TRUE,
+				'err_msg'   => 'enter a valid date',
 			),
 		'ym' =>
 			array(
 				'multiple'  => array( 'suffix' => array( 'y', 'm' ),
 				                      'connector' => '-' 
 				                    ),
+				'mbConvert' => 'hankaku',
 				'datetype'  => 'ym',
+				'err_msg'   => 'enter a year-month as YYYY-MM',
 			),
 		'time' =>
 			array(
 				'multiple'  => array( 'suffix' => array( 'h', 'i', 's' ), 
 				                      'connector' => ':' 
 				                    ),
+				'mbConvert' => 'hankaku',
 				'datetype'  => 'His',
+				'err_msg'   => 'enter a time',
 			),
 		'datetime' =>
 			array(
 				'multiple'  => array( 'suffix'  => array( 'y', 'm', 'd', 'h', 'i', 's' ), 
 				                      'sformat' => '%04d-%02d-%02d %02d:%02d:%02d' 
 				                    ),
+				'mbConvert' => 'hankaku',
 				'datetype'  => 'dt',
 			),
 		);
@@ -283,8 +293,9 @@ class Dio
 		if( !empty( $filters )
 		foreach( $filters as $f_name -> $option ) 
 		{
-			if( $option === FALSE ) continue;
+			if( $option === FALSE     ) continue;
 			if( $f_name == 'multiple' ) continue;
+			if( $f_name == 'err_msg'  ) continue;
 			// find error message.
 			if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
 				$err_msg = $option[ 'err_msg' ];
@@ -292,10 +303,10 @@ class Dio
 				if( count( $option ) == 1 && isset( $option[0] ) ) {
 					$option = $option[0];
 				}
-			}
-			else
-			if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
-				$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
+				else
+				if( count( $option ) === 0 ) {
+					$option = TRUE;
+				}
 			}
 			else
 			if( isset( $filters[ 'err_msg' ] ) ) {
