@@ -68,6 +68,17 @@ class Dio
 			  'checkdate'  => FALSE,
 			  );
 	// -----------------------------------
+	/** overwrites options for given filter.
+	 *  'filter name' => array(
+	 *       0       => 'method name',
+	 *       1       => 'option to use',
+	 *     'opt1'    =>
+	 *     'opt...'  =>
+	 *     'err_msg' => 'generic error message if this filter fails.'
+	 *     option is string -> use this option.
+	 *     option[ sub option name ]
+	 *
+	 */
 	static $filter_options = array(
 		'lower'       => array( 'string',   'tolower' ),
 		'upper'       => array( 'string',   'toupper' ),
@@ -206,6 +217,7 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** a special method to obtain multiple value from a data. 
 	 *  not to be used like other filters. 
+	 *  @return mix value found, FALSE if is not set. 
 	 */
 	function multiple( $data, $name, $option ) 
 	{
@@ -222,23 +234,23 @@ class Dio
 		if( isset( $option['connecter'] ) ) {
 			$con = $option['connecter'];
 		}
-		$found = array();
+		$lists = array();
 		foreach( $option[ 'suffix' ] as $sfx ) {
 			$name_sfx = $name . $sep . $sfx;
 			if( !isset( $data[ $name_sfx ] ) ) {
-				$found[] = $data[ $name_sfx ];
+				$lists[] = $data[ $name_sfx ];
 			}
 		}
-		if( empty( $found ) ) {
+		if( empty( $lists ) ) {
 			$found = FALSE;
 		}
 		else
 		if( isset( $option[ 'sformat' ] ) ) {
-			$option = array_merge( array( $option[ 'sformat' ], $found );
-			$found = call_user_func_array( 'sprintf', $option );
+			$param = array_merge( array( $option[ 'sformat' ], $lists );
+			$found = call_user_func_array( 'sprintf', $param );
 		}
 		else {
-			$found = implode( $con, $found );
+			$found = implode( $con, $lists );
 		}
 		return $found;
 	}
@@ -247,16 +259,34 @@ class Dio
 	 */
 	function validate( &$value, $filters=array(), &$error ) 
 	{
-		$success = TRUE;
+		// -----------------------------------
 		// build filter list. 
 		$filters = array_merge( static::$default_filters, static::$default_verifies, $options );
+		// -----------------------------------
 		// filter/verify $value.
+		$success = TRUE;
 		if( !empty( $filters )
 		foreach( $filters as $f_name -> $option ) 
 		{
 			if( $option === FALSE ) continue;
 			if( $f_name == 'multiple' ) continue;
-			$success = self::filter( $value, $f_name, $option, $error, $loop );
+			// find error message.
+			if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
+				$err_msg = $option[ 'err_msg' ];
+			}
+			else
+			if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
+				$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
+			}
+			else
+			if( isset( $filters[ 'err_msg' ] ) ) {
+				$err_msg = $filters[ 'err_msg' ];
+			}
+			else {
+				$err_msg = "not a valid input ({$f_name})";
+			}
+			// apply filter
+			$success = self::filter( $value, $f_name, $option, $error, $loop, $err_msg );
 			if( $success === FALSE ) break;
 			if( $loop == 'break' ) break;
 		}
@@ -265,7 +295,7 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** main verify method for verifying value using this Verify class. 
 	 */ 
-	function filter( $value, $f_name, $option, &$error=NULL, &$loop=NULL ) 
+	function filter( $value, $f_name, $option, &$error=NULL, &$loop=NULL, $err_msg=TRUE ) 
 	{
 		$success = TRUE;
 		// -----------------------------------
@@ -279,19 +309,6 @@ class Dio
 				$success &= self::filter( $value[$key], $f_name, $option, $error[$key], $loop );
 			}
 			return $success;
-		}
-		// -----------------------------------
-		// preprocess $option and $err_msg.
-		if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
-			$err_msg = $option[ 'err_msg' ];
-			unset( $option[ 'err_msg' ] );
-			if( count( $option ) == 1 ) { // reduce array to string.
-				foreach( $option as $opt ) {}
-				$option = $opt;
-			}
-		}
-		else {
-			$err_msg = "error@{$f_name}";
 		}
 		// -----------------------------------
 		// determine real $filter from $f_name and $option. 
