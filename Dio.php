@@ -310,6 +310,9 @@ class Dio
 				}
 			}
 			else
+			if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
+				$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
+			else
 			if( isset( $filters[ 'err_msg' ] ) ) {
 				$err_msg = $filters[ 'err_msg' ];
 			}
@@ -326,7 +329,7 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** main verify method for verifying value using this Verify class. 
 	 */ 
-	function filter( $value, $f_name, $option, &$error=NULL, &$loop=NULL, $err_msg=TRUE ) 
+	function filter( $value, $f_name, $option, &$error=NULL, &$loop=NULL, $err_msg='err' ) 
 	{
 		$success = TRUE;
 		// -----------------------------------
