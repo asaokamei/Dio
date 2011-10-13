@@ -34,6 +34,7 @@ Dio::validate( $email,
 class Dio
 {
 	// -----------------------------------
+	const  DEFAULT_EMPTY_VALUE = '';
 	static $default_charset = 'UTF-8';
 	// -----------------------------------
 	/** default_filters and default_verifies lists available filters, 
@@ -194,17 +195,23 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $_REQUEST array. 
 	 */
-	function request( $name, $type='text', $options=array(), &$error=NULL, $data=NULL ) {
+	function request( $name, $type='asis', $options=array(), &$error=NULL, $data=NULL ) {
 		if( $data === NULL ) $data = $_REQUEST;
 		return Dio::get( $data, $name, $type, $options, $error );
 	}
 	// +--------------------------------------------------------------- +
-	/** find a value $name in an array, $data. 
+	/** find a value $name in $data array. 
 	 *  if multiple option is set, get as multiple value. 
+	 *  @return mix value found, FALSE if is not set. 
+	 *
+	 *  TODO: make sure it returns FALSE if value is not set. 
+	 *        reduce value to DEFAULT_EMPTY_VALUE if the value 
+	 *        is any of FALSE, '', or NULL. 
 	 */
 	function find( $data, $name, $filters=FALSE ) {
 		if( isset( $data[ $name ] ) ) {
 			$value = $data[ $name ];
+			if( !have_value( $value ) ) $value = self::DEFAULT_EMPTY_VALUE;
 		}
 		else
 		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
@@ -236,14 +243,17 @@ class Dio
 			$con = $option['connecter'];
 		}
 		$lists = array();
+		$found = FALSE;
 		foreach( $option[ 'suffix' ] as $sfx ) {
 			$name_sfx = $name . $sep . $sfx;
-			if( !isset( $data[ $name_sfx ] ) ) {
+			$val = self::get( $data, $name_sfx );
+			if( $val !== FALSE ) {
 				$lists[] = $data[ $name_sfx ];
+				$found   = self::DEFAULT_EMPTY_VALUE;
 			}
 		}
-		if( empty( $lists ) ) {
-			$found = FALSE;
+		if( $found === FALSE; ) {
+			// keep $found as FALSE;
 		}
 		else
 		if( isset( $option[ 'sformat' ] ) ) {
