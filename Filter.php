@@ -12,22 +12,24 @@ class Filter
 	}
 	// +--------------------------------------------------------------- +
 	function string( &$value, $option=array() ) {
+		if( WORDY > 5 ) echo "string( $value, $option )";
 		if( $option == 'lower' ) {
-			$value = strtolower( $value )
+			$value = strtolower( $value );
 		}
 		else
 		if( $option == 'upper' ) {
-			$value = strtoupper( $value )
+			$value = strtoupper( $value );
 		}
 		else
 		if( $option == 'capital' ) {
-			$value = strcapital( $value )
+			$value = strcapital( $value );
 		}
+		if( WORDY > 5 ) echo " --> result=$value <br>";
 		return TRUE;
 	}
 	// +--------------------------------------------------------------- +
 	function sanitizeEmail( &$value, $option=array() ) {
-		$value = self::sanitize( $value, FILTER_SANITIZE_EMAIL, $option )
+		$value = self::sanitize( $value, FILTER_SANITIZE_EMAIL, $option );
 		return TRUE;
 	}
 	// +--------------------------------------------------------------- +
@@ -51,7 +53,7 @@ class Filter
 	 *  specify $option[ dbar ] (i.e. '/'.) if date is 'YYYY/MM/DD'. 
 	 */
 	function checkDate( $val, $option ) {
-		if( !have_value( $val ) return FALSE;
+		if( !have_value( $val ) ) return FALSE;
 		$dbar = '-';
 		if( isset( $option[ 'dbar' ] ) ) $dbar = $option[ 'dbar' ];
 		list( $year, $month, $day ) = explode( $dbar, $date );
@@ -207,19 +209,19 @@ class FilterJa extends Filter
 	// +--------------------------------------------------------------- +
 	/** only hankaku-katakana allowed. 
 	 */
-	function zenKanaOnly( $val, $option=array() ) {
+	function hanKanaOnly( $val, $option=array() ) {
 		return self::mbCheckKana( $val, 'han_kana_only' );
 	}
 	// +--------------------------------------------------------------- +
 	/** only zenkaku-hiragana allowed. 
 	 */
-	function zenKanaOnly( $val, $option=array() ) {
+	function zenHiraOnly( $val, $option=array() ) {
 		return self::mbCheckKana( $val, 'zen_hira_only' );
 	}
 	// +--------------------------------------------------------------- +
 	/** only hankaku allowed. 
 	 */
-	function zenKanaOnly( $val, $option=array() ) {
+	function hanKakuOnly( $val, $option=array() ) {
 		return self::mbCheckKana( $val, 'hankaku_only' );
 	}
 	// +--------------------------------------------------------------- +

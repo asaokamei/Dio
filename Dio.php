@@ -1,8 +1,10 @@
 <?php
 namespace CenaDta\Dio;
+require_once( './Filter.php' );
 use CenaDta\Dio\Filter as Filter;
 use CenaDta\Dio\Verify as Verify;
 
+/****
 // sample code....
 
 Dio::get( $_POST, 'user_mail', 'email', 
@@ -29,7 +31,6 @@ Dio::validate( $email,
 		'email'    => array(),
 	), array(), $error );
 
-/****
 ****/
 class Dio
 {
@@ -80,9 +81,10 @@ class Dio
 	 *
 	 */
 	static $filter_options = array(
-		'lower'       => array( 'string',   'tolower' ),
-		'upper'       => array( 'string',   'toupper' ),
-		'capital'     => array( 'string',   'tocapital' ),
+		'default'     => array( 'setDefault' ),
+		'lower'       => array( 'string',   'lower' ),
+		'upper'       => array( 'string',   'upper' ),
+		'capital'     => array( 'string',   'capital' ),
 		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*'
 							  ),
 		'datetype'    => array( 'regexp', 
@@ -103,10 +105,11 @@ class Dio
 	);
 	
 	// -----------------------------------
-	static $filter_classes = array();
+	static $filter_classes = array( 'CenaDta\Dio\Filter' );
 	
 	// -----------------------------------
 	static $filters = array(
+		/*
 		// example of filter setting.
 		'some type name' => 
 			array(
@@ -118,13 +121,14 @@ class Dio
 				'mbJaKana'     => TRUE, 
 				'err_msg'      => 'error message here',
 				),
+		*/
 		// filters for email type.
 		'asis'  => array(),
 		'email' => 
 			array(
 				'mbConvert'  => 'hankaku',
 				'sanitize'   => FILTER_SANITIZE_EMAIL,
-				'string'     => 'tolower',
+				'string'     => 'lower',
 				'required'   => FALSE,
 				'default'    => FALSE,
 				'checkMail'  => TRUE,
@@ -230,7 +234,7 @@ class Dio
 		}
 		else
 		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
-			$value = self::multiple( $data, $name, $filters[ 'multiple' ] )
+			$value = self::multiple( $data, $name, $filters[ 'multiple' ] );
 		}
 		else {
 			$value = FALSE;
@@ -267,12 +271,12 @@ class Dio
 				$found   = self::DEFAULT_EMPTY_VALUE;
 			}
 		}
-		if( $found === FALSE; ) {
+		if( $found === FALSE ) {
 			// keep $found as FALSE;
 		}
 		else
 		if( isset( $option[ 'sformat' ] ) ) {
-			$param = array_merge( array( $option[ 'sformat' ], $lists );
+			$param = array_merge( array( $option[ 'sformat' ] ), $lists );
 			$found = call_user_func_array( 'sprintf', $param );
 		}
 		else {
@@ -291,7 +295,7 @@ class Dio
 		// -----------------------------------
 		// filter/verify $value.
 		$success = TRUE;
-		if( !empty( $filters )
+		if( !empty( $filters ) )
 		foreach( $filters as $f_name -> $option ) 
 		{
 			if( $option === FALSE     ) continue;
@@ -312,6 +316,7 @@ class Dio
 			else
 			if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
 				$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
+			}
 			else
 			if( isset( $filters[ 'err_msg' ] ) ) {
 				$err_msg = $filters[ 'err_msg' ];
@@ -368,10 +373,11 @@ class Dio
 			else 
 			if( isset( self::$filter_options[ $f_name ][1] ) ) {
 				// use option in filter_potions...
-				$option = self::$filter_options[ $f_name ][1]
+				$option = self::$filter_options[ $f_name ][1];
 			}
 			// use option as is. 
 		}
+		if( WORDY > 3 ) echo "filter( $value, $f_name, $option )<br />";
 		// -----------------------------------
 		// filter/verify value. 
 		if( is_callable( $option ) ) {
@@ -380,11 +386,13 @@ class Dio
 		else
 		if( method_exists( 'Dio', $filter ) ) {
 			$success = Dio::$filter( $value, $option, $loop );
+			if( WORDY > 5 ) echo "apply Dio::{$filter}, success=$success, value=$value <br />";
 		}
 		else {
 			foreach( self::$filter_classes as $class ) {
 				if( method_exists( $class, $filter ) ) {
 					$success = $class::$filter( $value, $option );
+					if( WORDY > 5 ) echo "apply {$class}::{$filter}, success=$success, value=$value <br />";
 				}
 			}
 		}
@@ -392,13 +400,11 @@ class Dio
 			if( $err_msg ) { // use err_msg in option. 
 				$error = $err_msg;
 			}
-			else
-			if( $err_msg =  ) {
-			}
 			else { // use generic error message. 
 				$err_msg = "error@{$f_name}";
 			}
-			if( WORDY ) echo "<font color=red>verify failed( $value, $error, $f_name ), err_msg={$err_msg}</font><br/>\n";
+			if( WORDY ) echo "<font color=red>verify failed( $value, $error, $f_name ), " . 
+				"err_msg={$err_msg}</font><br/>\n";
 		}
 		return $success;
 	}
@@ -457,7 +463,7 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** if value is empty, set to default value. 
 	 */
-	function default( &$value, $option, &$loop=NULL ) {
+	function setDefault( &$value, $option, &$loop=NULL ) {
 		if( have_value( $value ) ) { // have value. default is no use...
 			return TRUE;
 		}
