@@ -49,7 +49,7 @@ class Dio
 			  'multiple'    => FALSE,
 			  'noNull'      => TRUE,
 			  'encoding'    => 'UTF-8',
-			  'mbCheckKana' => 'standard', 
+			  'mbConvert'   => 'standard', 
 			  'sanitize'    => FALSE,
 			  'date'        => FALSE,
 			  'time'        => FALSE,
@@ -67,6 +67,7 @@ class Dio
 			  'number'     => FALSE,
 			  'range'      => FALSE,
 			  'checkdate'  => FALSE,
+			  'mbCheckKana' => FALSE,
 			  );
 	// -----------------------------------
 	/** overwrites options for given filter.
@@ -95,6 +96,7 @@ class Dio
 		                                    'dt'   => '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}',
 							  ),
 		'number'      => array( 'regexp',   '[0-9]*', 
+							                'number' => '[0-9]*',
 							                'int'    => '[-]{0,1}[0-9]*',
 								            'float'  => '[-]{0,1}[.0-9]*', 
 							  ),
@@ -105,7 +107,7 @@ class Dio
 	);
 	
 	// -----------------------------------
-	static $filter_classes = array( 'CenaDta\Dio\Filter' );
+	static $filter_classes = array( 'CenaDta\Dio\Filter', 'CenaDta\Dio\FilterJa' );
 	
 	// -----------------------------------
 	static $filters = array(
@@ -124,7 +126,7 @@ class Dio
 		*/
 		// filters for email type.
 		'asis'  => array(),
-		'email' => 
+		'mail'  => 
 			array(
 				'mbConvert'  => 'hankaku',
 				'sanitize'   => FILTER_SANITIZE_EMAIL,
@@ -138,7 +140,7 @@ class Dio
 			array(
 				'mbConvert'   => 'hankaku',
 				'mbCheckKana' => 'hankaku_only',
-				'number'      => TRUE,
+				'number'      => 'number',
 				'err_msg'     => 'enter a number',
 			),
 		'int'  =>
@@ -191,20 +193,27 @@ class Dio
 			),
 		);
 	// +--------------------------------------------------------------- +
+	/** create filters array for given type and optional filters.
+	 */
+	function _getFilter( $filter, $type ) {
+		if( isset( self::$filters[ $type ] ) ) {
+			$filter = array_merge( self::$filters[ $type ], $filter );
+		}
+		return $filter;
+	}
+	// +--------------------------------------------------------------- +
 	/** validate a value based on type. 
 	 *  filter-verify-value
 	 */
-	function verify( &$value, $type='asis', $options=array(), &$error=NULL ) {
-		$filters = self::$filters[ $type ];
-		$filters = array_merge( $filters, $options );
+	function verify( &$value, $type='asis', $filter=array(), &$error=NULL ) {
+		$filters = self::_getFilter( $filter, $type );
 		return self::validate( $value, $filters, $error );
 	}
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $data array. 
 	 */
-	function get( $data, $name, $type='asis', $options=array(), &$error=NULL ) {
-		$filters = self::$filters[ $type ];
-		$filters = array_merge( $filters, $options );
+	function get( $data, $name, $type='asis', $filter=array(), &$error=NULL ) {
+		$filters = self::_getFilter( $filter, $type );
 		$value = self::find( $data, $name, $filters );
 		if( !self::validate( $value, $options, $error ) ) {
 			$value = FALSE;
@@ -285,114 +294,87 @@ class Dio
 		return $found;
 	}
 	// +--------------------------------------------------------------- +
-	/** filter-verify-value
+	/** validates a value given list of filters. 
 	 */
 	function validate( &$value, $filters=array(), &$error ) 
 	{
 		// -----------------------------------
 		// build filter list. 
-		$filters = array_merge( static::$default_filters, static::$default_verifies, $options );
+		$filters = array_merge( static::$default_filters, static::$default_verifies, $filters );
 		// -----------------------------------
 		// filter/verify $value.
 		$success = TRUE;
 		if( !empty( $filters ) )
-		foreach( $filters as $f_name -> $option ) 
+		foreach( $filters as $f_name => $option ) 
 		{
 			if( $option === FALSE     ) continue;
 			if( $f_name == 'multiple' ) continue;
 			if( $f_name == 'err_msg'  ) continue;
-			// find error message.
-			if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
-				$err_msg = $option[ 'err_msg' ];
-				unset( $option[ 'err_msg' ] );
-				if( count( $option ) == 1 && isset( $option[0] ) ) {
-					$option = $option[0];
-				}
-				else
-				if( count( $option ) === 0 ) {
-					$option = TRUE;
-				}
-			}
-			else
-			if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
-				$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
-			}
-			else
-			if( isset( $filters[ 'err_msg' ] ) ) {
-				$err_msg = $filters[ 'err_msg' ];
-			}
-			else {
-				$err_msg = "not a valid input ({$f_name})";
-			}
-			// apply filter
-			$success = self::filter( $value, $f_name, $option, $error, $loop, $err_msg );
-			if( $success === FALSE ) break;
+			$err_msg = self::_getErrMsg( $filters, $f_name, &$option );
+			$success = self::filter( $value, $f_name, $option, $error, $err_msg, $loop );
+			if( !$success ) break;
 			if( $loop == 'break' ) break;
 		}
+		if( WORDY ) 
+			echo ($success) ? 
+				"<font color=blue>validated: '$value'</font><br />":
+				"<font color=red>invalidated: '$value'</font><br />";
 		return $success;
+	}
+	// +--------------------------------------------------------------- +
+	/** determine error messages from filters/f_name/option. 
+	 */
+	function _getErrMsg( $filters, $f_name, &$option ) 
+	{
+		$err_msg = "invalid {$f_name}";
+		if( isset( $filters[ 'err_msg' ] ) ) {
+			// global error messages. 
+			$err_msg = $filters[ 'err_msg' ];
+		}
+		if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
+			// error message in option for this filter (f_name). 
+			$err_msg = $option[ 'err_msg' ];
+			unset( $option[ 'err_msg' ] );
+			if( count( $option ) == 1 && isset( $option[0] ) ) {
+				$option = $option[0];
+			}
+			else
+			if( count( $option ) === 0 ) {
+				$option = TRUE;
+			}
+		}
+		else
+		if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
+			// generi error messages in filter_option.
+			$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
+		}
+		return $err_msg;
 	}
 	// +--------------------------------------------------------------- +
 	/** main verify method for verifying value using this Verify class. 
 	 */ 
-	function filter( $value, $f_name, $option, &$error=NULL, &$loop=NULL, $err_msg='err' ) 
+	function filter( &$value, $f_name, $option, &$error=NULL, $err_msg='err', &$loop=NULL ) 
 	{
+		if( WORDY > 5 ) {  echo "filter( '$value', $f_name, $option, $err_msg )<br/>"; };
 		$success = TRUE;
-		// -----------------------------------
-		// recursively filter on array $value. 
-		if( is_array( $value ) ) {
-		   // make sure $error is also an array. 
-			if( !is_array( $error ) ) { 
-				$error = array(); 
-			}
-			foreach( $value as $key => $val ) {
-				$success &= self::filter( $value[$key], $f_name, $option, $error[$key], $loop );
-			}
-			return $success;
-		}
-		// -----------------------------------
-		// determine real $filter from $f_name and $option. 
-		if( !isset( self::$filter_options[ $f_name ] ) ) {
-			// simple case. $f_name is not listed in filter option. 
-			$filter = $f_name;
-		}
-		else 
-		if( !is_array( self::$filter_options[ $f_name ] ) ) {
-			// use different name in the filter list. 
-			$filter = self::$filter_options[ $f_name ];
-		}
-		else {
-			// or more complicated case if is an array...
-			// the first item is always the filter name. 
-			$filter = self::$filter_options[ $f_name ][0];
-			// now, get the option. 
-			if( !is_array( $option ) && 
-				isset( self::$filter_options[ $f_name ][ $option ] ) ) {
-				// use predefined option. 
-				$option = self::$filter_options[ $f_name ][ $option ];
-			}
-			else 
-			if( isset( self::$filter_options[ $f_name ][1] ) ) {
-				// use option in filter_potions...
-				$option = self::$filter_options[ $f_name ][1];
-			}
-			// use option as is. 
-		}
-		if( WORDY > 3 ) echo "filter( $value, $f_name, $option )<br />";
+		self::_getFilterFunc( $f_name, $option, $filter, $arg );
+		if( WORDY > 3 ) {  echo "filter( '$value', $f_name, $arg )<br/>"; };
 		// -----------------------------------
 		// filter/verify value. 
 		if( is_callable( $option ) ) {
-			$success = call_user_func_array( $option, $value );
+			$success = call_user_func_array( $option, $arg );
 		}
 		else
 		if( method_exists( 'Dio', $filter ) ) {
-			$success = Dio::$filter( $value, $option, $loop );
+			$success = Dio::$filter( $value, $arg, $loop );
 			if( WORDY > 5 ) echo "apply Dio::{$filter}, success=$success, value=$value <br />";
 		}
 		else {
 			foreach( self::$filter_classes as $class ) {
 				if( method_exists( $class, $filter ) ) {
-					$success = $class::$filter( $value, $option );
-					if( WORDY > 5 ) echo "apply {$class}::{$filter}, success=$success, value=$value <br />";
+					$success = $class::$filter( $value, $arg );
+					if( WORDY > 3 ) echo "apply {$class}::{$filter}( $arg ) success=$success, value=$value <br />";
+					break;
 				}
 			}
 		}
@@ -403,10 +385,55 @@ class Dio
 			else { // use generic error message. 
 				$err_msg = "error@{$f_name}";
 			}
-			if( WORDY ) echo "<font color=red>verify failed( $value, $error, $f_name ), " . 
-				"err_msg={$err_msg}</font><br/>\n";
+			if( WORDY ) 
+				echo "<font color=red>Dio::filter failed on '$value', " . 
+					 "filter( $filter, $arg ) => $error</font><br/>\n";
 		}
 		return $success;
+	}
+	// +--------------------------------------------------------------- +
+	/** get real function and argument for given f_name/option.
+	 */ 
+	function _getFilterFunc( $f_name, $option, &$filter, &$arg ) 
+	{
+		if( WORDY > 5 ) {  echo "filter( $f_name )"; var_dump( $option ); };
+		$filter = $f_name;
+		$arg = $option;
+		// -----------------------------------
+		// determine real $filter from $f_name and $option. 
+		if( !isset( self::$filter_options[ $f_name ] ) ) {
+			// $f_name is not listed in filter option; use as is. 
+		}
+		else 
+		if( !is_array( self::$filter_options[ $f_name ] ) ) {
+			// it's a string. use the name in the filter list. 
+			$filter = self::$filter_options[ $f_name ];
+		}
+		else { 
+			// found array info in the filter list.
+			// the first item is always the filter name. 
+			$filter = self::$filter_options[ $f_name ][0];
+			// now, get the option. 
+			if( is_array( $option ) ) { // use array as is.
+				$arg = $option;
+			}
+			else
+			if( !is_string( $option ) ) { // hmm not a string. 
+				$arg = $option;  // maybe a function... 
+			}
+			else
+			if( isset( self::$filter_options[ $f_name ][ $option ] ) ) {
+				// use predefined option. 
+				$arg = self::$filter_options[ $f_name ][ $option ];
+			}
+			else 
+			if( isset( self::$filter_options[ $f_name ][1] ) ) {
+				// use option in filter_potions...
+				$arg = self::$filter_options[ $f_name ][1];
+			}
+			// use option as is. 
+		}
+		if( WORDY > 5 ) {  echo "_getFilterFunc( $f_name, $option, &$filter, &$arg )<br/>"; };
 	}
 	// +--------------------------------------------------------------- +
 	//  modify filter settings.

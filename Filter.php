@@ -33,8 +33,8 @@ class Filter
 		return TRUE;
 	}
 	// +--------------------------------------------------------------- +
-	function sanitize( &$value, $option=array() ) {
-		if( !filter_var( $value, $filter, $option  ) ) {
+	function sanitize( &$value, $option ) {
+		if( !filter_var( $value, $option  ) ) {
 			$value = '';
 		}
 		return TRUE;
@@ -120,7 +120,8 @@ class Filter
 	/**
 	 */
 	function regexp( $val, $option ) {
-		return preg_match( "/$option/", $val );
+		$ok = preg_match( "/^{$option}\$/", $val );
+		return $ok;
 	}
 	// +--------------------------------------------------------------- +
 	// ERROR MESSAGES
@@ -228,7 +229,8 @@ class FilterJa extends Filter
 	/** checks for kana type. 
 	 */
 	function mbCheckKana( $val, $option=array() ) {
-        switch( $convert_str ) 
+		$ereg_str = FALSE;
+        switch( $option ) 
         {
             case 'zen_kana_only': // only zenkaku-katakana
                 $ereg_str = "^[　ー−‐ァ-ヶ]*$";
@@ -247,24 +249,25 @@ class FilterJa extends Filter
                 break;
         }
 		if( $ereg_str ) {
-			return mb_ereg( "^{$ereg_expr}$", $value );
+			return mb_ereg( "^{$ereg_str}$", $val );
 		}
 		return TRUE;
 	}
 	// +--------------------------------------------------------------- +
 	/**
 	 */
-	function mbConvert( $val, $option=array() ) {
-		if( !$val ) return $val;
+	function mbConvert( &$val, $option=array() ) {
 		switch( $option ) {
-			case 'hankaku':		$str = 'ak';		break;
+			case 'hankaku':		$str = 'aks';		break;
 			case 'han_kana':	$str = 'kh';		break;
 			case 'zen_hira':	$str = 'HVc';		break;
 			case 'zen_kana':	$str = 'KVC';		break;
 			default:			$str = 'ASV';		break;
 		}
-        $val = mb_convert_kana( $val, $str );
-        return $val;
+		echo "$str $val ";
+        $val = mb_convert_kana( $val, $str, 'UTF-8' );
+		echo "$str $val";
+        return TRUE;
 	}
 	// +--------------------------------------------------------------- +
 }
