@@ -71,13 +71,16 @@ class Dio
 			  );
 	// -----------------------------------
 	/** overwrites options for given filter.
-	 *  'filter name' => array(
-	 *       0       => 'method name',
-	 *       1       => 'option to use',
-	 *     'opt1'    =>
-	 *     'opt...'  =>
-	 *     'err_msg' => 'generic error message if this filter fails.'
-	 *     option is string -> use this option.
+	 *  'filter name' => option,
+	 *   
+	 *   if option is string -> use this option.
+	 *   if option is array, real method name, and shorthand option can be set
+	 *   $option = array(
+	 *          0       => 'method name',
+	 *          1       => 'option to use',
+	 *        'opt1'    => 'real option 1',
+	 *        'opt...'  => 'real option 2',
+	 *      )
 	 *     option[ sub option name ]
 	 *
 	 */
@@ -103,9 +106,15 @@ class Dio
 		'jaKatakana'  => array( 'mbJaKana', 'standard' ),
 		'hankaku'     => array( 'mbJaKana', 'hankaku' ),
 		'hankana'     => array( 'mbJaKana', 'hankana' ),
-		'required'    => array( 'required', 'err_msg' => 'required field' ),
 	);
 	
+	// -----------------------------------
+	/** error messages for filter. 
+	 */
+	static $default_err_msgs = array(
+		'required'    => array( 'required field' ),
+		'encoding'    => array( 'invalid characters' ),
+	);
 	// -----------------------------------
 	static $filter_classes = array( 'CenaDta\Dio\Filter', 'CenaDta\Dio\FilterJa' );
 	
@@ -196,9 +205,10 @@ class Dio
 	/** create filters array for given type and optional filters.
 	 */
 	function _getFilter( $filter, $type ) {
-		if( isset( self::$filters[ $type ] ) ) {
-			$filter = array_merge( self::$filters[ $type ], $filter );
+		if( !isset( self::$filters[ $type ] ) ) {
+			$type = 'asis';
 		}
+		$filter = array_merge( self::$filters[ $type ], $filter );
 		return $filter;
 	}
 	// +--------------------------------------------------------------- +
@@ -310,7 +320,7 @@ class Dio
 			if( $option === FALSE     ) continue;
 			if( $f_name == 'multiple' ) continue;
 			if( $f_name == 'err_msg'  ) continue;
-			$err_msg = self::_getErrMsg( $filters, $f_name, &$option );
+			$err_msg = self::_getErrMsg( $filters, $f_name );
 			$success = self::filter( $value, $f_name, $option, $error, $err_msg, $loop );
 			if( !$success ) break;
 			if( $loop == 'break' ) break;
@@ -324,30 +334,36 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** determine error messages from filters/f_name/option. 
 	 */
-	function _getErrMsg( $filters, $f_name, &$option ) 
+	function _getErrMsg( $filters, $f_name ) 
 	{
-		$err_msg = "invalid {$f_name}";
+		// build $messages: 
+		//   0       => global err_msg, 
+		//  'f_name' => filter specific err_msg
 		if( isset( $filters[ 'err_msg' ] ) ) {
-			// global error messages. 
-			$err_msg = $filters[ 'err_msg' ];
+			if( is_array( $filters[ 'err_msg' ] ) ) {
+				$messages = $filters[ 'err_msg' ];
+			}
+			else {
+				$messages = array( $filters[ 'err_msg' ] );
+			}
+			$messages = $messages + self::$default_err_msgs;
 		}
-		if( is_array( $option ) && isset( $option[ 'err_msg' ] ) ) {
-			// error message in option for this filter (f_name). 
-			$err_msg = $option[ 'err_msg' ];
-			unset( $option[ 'err_msg' ] );
-			if( count( $option ) == 1 && isset( $option[0] ) ) {
-				$option = $option[0];
-			}
-			else
-			if( count( $option ) === 0 ) {
-				$option = TRUE;
-			}
+		else {
+			$messages = self::$default_err_msgs;
+		}
+		if( isset( $messages[ $f_name ] ) ) {
+			// filter specific error messages. 
+			$err_msg = $filters[ $f_name ];
 		}
 		else
-		if( isset( self::$filter_options[ $f_name ][ 'err_msg' ] ) ) {
-			// generi error messages in filter_option.
-			$err_msg = self::$filter_options[ $f_name ][ 'err_msg' ];
+		if( isset( $messages[ 0 ] ) ) {
+			// global error messages. 
+			$err_msg = $messages[ 0 ];
 		}
+		else {
+			$err_msg = "invalid {$f_name}";
+		}
+		if( WORDY > 5 ) echo "errMsg: '{$err_msg}' for $f_name<br />";
 		return $err_msg;
 	}
 	// +--------------------------------------------------------------- +
