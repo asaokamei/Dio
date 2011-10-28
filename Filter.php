@@ -262,7 +262,7 @@ class FilterJa extends Filter
 			case 'han_kana':	$str = 'kh';		break;
 			case 'zen_hira':	$str = 'HVc';		break;
 			case 'zen_kana':	$str = 'KVC';		break;
-			default:			$str = 'ASV';		break;
+			default:			$str = 'KV';		break;
 		}
 		echo "$str $val ";
         $val = mb_convert_kana( $val, $str, 'UTF-8' );
