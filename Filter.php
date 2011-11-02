@@ -74,7 +74,7 @@ class Filter
 	 *  $option[ min ] speficies the minimum length. 
 	 *  $option[ max ] speficies the maximum length. 
 	 */
-	function length( $val, $option ) {
+	function maxlength( $val, $option ) {
 		$ok  = TRUE;
 		$len = strlen( $val );
 		if( is_array( $option ) ) {
@@ -93,6 +93,28 @@ class Filter
 		return $ok;
 	}
 	// +--------------------------------------------------------------- +
+	/**
+	 */
+	function min( $val, $option ) {
+        $ok = TRUE;
+        if( $val < $option ) {
+            $ok = FALSE;
+        }
+        return $ok;
+    }
+	// +--------------------------------------------------------------- +
+	/**
+	 */
+	function max( $val, $option ) {
+        $ok = TRUE;
+        if( $val > $option ) {
+            $ok = FALSE;
+        }
+        return $ok;
+	}
+	// +--------------------------------------------------------------- +
+	/**
+	 */
 	function range( $val, $option ) {
 		$ok  = TRUE;
 		if( !is_numeric( $val ) ) return FALSE;
@@ -119,73 +141,9 @@ class Filter
 	// +--------------------------------------------------------------- +
 	/**
 	 */
-	function regexp( $val, $option ) {
+	function pattern( $val, $option ) {
 		$ok = preg_match( "/^{$option}\$/", $val );
 		return $ok;
-	}
-	// +--------------------------------------------------------------- +
-	// ERROR MESSAGES
-	// +--------------------------------------------------------------- +
-	function err_msg( $filter, $option ) 
-	{
-		$err_msg = FALSE;
-		switch( $filter ) {
-			case 'required':
-				$err_msg = 'required field';
-				break;
-			case 'length':
-				if( !is_array( $option ) ) {
-					$err_msg = "length is {$option} charactor";
-				}
-				else {
-					$err_msg = "length must be: ";
-					if( isset( $option[ 'min' ] ) ) {
-						$err_msg = " longer than {$option{'min'}}";
-					}
-					if( isset( $option[ 'max' ] ) ) {
-						$err_msg = " shorter than {$option{'max'}}";
-					}
-				}
-				break;
-			case 'checkdate':
-				$err_msg = "not a valid date";
-				break;
-			case 'code':
-				$err_msg = "only alpha numeric charactors";
-				break;
-			case 'number':
-				switch( $option ) {
-					case 'int':
-						$err_msg = 'please enter an integer';
-						break;
-					case 'float':
-						$err_msg = 'please enter float value';
-						break;
-					case 'number':
-						$err_msg = 'please enter numbers only';
-						break;
-					default:
-						$err_msg = 'please enter numeric value';
-						break;
-				}
-				break;
-			case 'range':
-				$err_msg = "invalid range:";
-				if( isset( $option['min'] ) ) {
-					$err_msg .= " minimum {$option{'min'}}";
-				}
-				if( isset( $option['max'] ) ) {
-					$err_msg .= " miximum {$option{'min'}}";
-				}
-				if( isset( $option['lt'] ) ) {
-					$err_msg .= " less than {$option{'min'}}";
-				}
-				if( isset( $option['gt'] ) ) {
-					$err_msg .= " greater than {$option{'min'}}";
-				}
-				break;
-		}
-		return $err_msg;
 	}
 	// +--------------------------------------------------------------- +
 }
