@@ -6,6 +6,15 @@ require_once( "./Dio.php" );
 
 use CenaDTA\Dio\Dio as Dio;
 
+?>
+<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8' />
+</head>
+<body>
+<?php
+
 $input  = 'a text';
 $return = Dio::verify( $input, 'text', array(), $error );
 
@@ -17,9 +26,9 @@ $return = Dio::filter( $input, 'upper', TRUE, $error );
 echo "<br />test #2 <br />";
 
 $input  = 'a text';
-$return = Dio::filter( $input, 'regexp', '[ a-z]*', $error );
+$return = Dio::filter( $input, 'pattern', '[ a-z]*', $error );
 
-$return = Dio::filter( $input, 'regexp', '[A-Z]*', $error, 'only upper case' );
+$return = Dio::filter( $input, 'pattern', '[A-Z]*', $error, 'only upper case' );
 
 echo "<br />test #3 <br />";
 
@@ -50,3 +59,5 @@ $input  = '-100.0';
 $return = Dio::verify( $input, 'float', array(), $error );
 
 ?>
+</body>
+</html>
