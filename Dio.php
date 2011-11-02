@@ -4,34 +4,6 @@ require_once( './Filter.php' );
 use CenaDta\Dio\Filter as Filter;
 use CenaDta\Dio\Verify as Verify;
 
-/****
-// sample code....
-
-Dio::get( $_POST, 'user_mail', 'email', 
-	array(
-		'default'  => 'text@example.com',
-		'required' => TRUE,
-		'string'   => 'lower',
-	)
-);
-
-Dio::verify( $email, 'email', 
-	array(
-		'default'  => 'text@example.com',
-		'required' => TRUE,
-	), $error );
-
-Dio::validate( $email, 
-	array(
-		'secure'   => array( 'charset' => 'UTF-8' ),
-		'tolower'  => array(), 
-		'sanitize' => array( 'sanitize' => FILTER_SANITIZE_EMAIL ),
-		'required' => array( 'required' => TRUE ),
-		'default'  => array( 'default' => 'test@example.com', 'loop' => 'break' ),
-		'email'    => array(),
-	), array(), $error );
-
-****/
 class Dio
 {
 	// -----------------------------------
@@ -62,9 +34,11 @@ class Dio
 			  'default'    => FALSE, // default is filter but put it at the beginning of verifies. 
 			  'required'   => FALSE,
 			  'code'       => FALSE,
-			  'length'     => FALSE,
-			  'regexp'     => FALSE,
+			  'maxlength'  => FALSE,
+			  'pattern'    => FALSE,
 			  'number'     => FALSE,
+              'min'        => FALSE,
+              'max'        => FALSE,
 			  'range'      => FALSE,
 			  'checkdate'  => FALSE,
 			  'mbCheckKana' => FALSE,
@@ -89,16 +63,16 @@ class Dio
 		'lower'       => array( 'string',   'lower' ),
 		'upper'       => array( 'string',   'upper' ),
 		'capital'     => array( 'string',   'capital' ),
-		'code'        => array( 'regexp',   '[-_0-9a-zA-Z]*'
+		'code'        => array( 'pattern',  '[-_0-9a-zA-Z]*'
 							  ),
-		'datetype'    => array( 'regexp', 
+		'datetype'    => array( 'pattern', 
 		                                    'ymd'  => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
 		                                    'ym'   => '[0-9]{4}-[0-9]{2}',
 		                                    'His'  => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
 		                                    'Hi'   => '[0-9]{2}:[0-9]{2}',
 		                                    'dt'   => '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}',
 							  ),
-		'number'      => array( 'regexp',   '[0-9]*', 
+		'number'      => array( 'pattern',  '[0-9]*', 
 							                'number' => '[0-9]*',
 							                'int'    => '[-]{0,1}[0-9]*',
 								            'float'  => '[-]{0,1}[.0-9]*', 
@@ -258,7 +232,7 @@ class Dio
 		else {
 			$value = FALSE;
 		}
-		return $valeu;
+		return $value;
 	}
 	// +--------------------------------------------------------------- +
 	/** a special method to obtain multiple value from a data. 
