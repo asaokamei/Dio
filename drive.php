@@ -58,6 +58,20 @@ $return = Dio::verify( $input, 'number', array(), $error );
 $input  = '-100.0';
 $return = Dio::verify( $input, 'float', array(), $error );
 
+echo "<br />test #5 <br />";
+
+$input  = 'same as';
+$return = Dio::filter( $input, 'sameas', 'same as', $error );
+$return = Dio::filter( $input, 'sameas', 'different', $error );
+
+$return = Dio::verify( $input, 'asis', array(
+    'sameas' => 'same as'
+), $error );
+$return = Dio::verify( $input, 'asis', array(
+    'sameas' => 'different'
+), $error );
+
+
 ?>
 </body>
 </html>

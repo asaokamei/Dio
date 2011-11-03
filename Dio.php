@@ -42,6 +42,9 @@ class Dio
 			  'range'      => FALSE,
 			  'checkdate'  => FALSE,
 			  'mbCheckKana' => FALSE,
+              'sameas'     => FALSE,
+              'samewith'   => FALSE,
+              'sameempty'  => FALSE,
 			  );
 	// -----------------------------------
 	/** overwrites options for given filter.
@@ -86,8 +89,10 @@ class Dio
 	/** error messages for filter. 
 	 */
 	static $default_err_msgs = array(
-		'required'    => array( 'required field' ),
-		'encoding'    => array( 'invalid characters' ),
+		'required'    => 'required field',
+		'encoding'    => 'invalid characters',
+        'sameas'      => 'values are different',
+        'sameempty'   => 'entery value to compare',
 	);
 	// -----------------------------------
 	static $filter_classes = array( 'CenaDta\Dio\Filter', 'CenaDta\Dio\FilterJa' );
@@ -220,7 +225,7 @@ class Dio
 	 *        reduce value to DEFAULT_EMPTY_VALUE if the value 
 	 *        is any of FALSE, '', or NULL. 
 	 */
-	function find( $data, $name, $filters=FALSE ) {
+	function find( $data, $name, &$filters=FALSE ) {
 		if( isset( $data[ $name ] ) ) {
 			$value = $data[ $name ];
 			if( !have_value( $value ) ) $value = self::DEFAULT_EMPTY_VALUE;
@@ -232,6 +237,17 @@ class Dio
 		else {
 			$value = FALSE;
 		}
+        if( isset( $filters[ 'samewith' ] ) && $filters[ 'samewith' ] !== FALSE ) {
+            $sub_filters = $filters;
+            $sub_filters[ 'samewith' ] = FALSE;
+            $sub_value = self::find( $data, $sub_name, $sub_filters );
+            if( $sub_value ) {
+                $filters[ 'sameas' ] = $sub_value;
+            }
+            else {
+                $filters[ 'sameempty' ] = TRUE;
+            }
+        }
 		return $value;
 	}
 	// +--------------------------------------------------------------- +
@@ -327,7 +343,7 @@ class Dio
 		}
 		if( isset( $messages[ $f_name ] ) ) {
 			// filter specific error messages. 
-			$err_msg = $filters[ $f_name ];
+			$err_msg = $messages[ $f_name ];
 		}
 		else
 		if( isset( $messages[ 0 ] ) ) {

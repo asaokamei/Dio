@@ -45,7 +45,7 @@ class Filter
 	/** check if value is a code, number, alpahbets, and '-' & '_'.
 	 */
 	function code( $val, $option ) {
-		return self::regexp( $val, '[-_0-9a-zA-Z]*' );
+		return self::pattern( $val, '[-_0-9a-zA-Z]*' );
 	}
 	// +--------------------------------------------------------------- +
 	/** check if date is a valid date with checkdate function. 
@@ -66,7 +66,7 @@ class Filter
 	/** checks for easy mail format. 
 	 */
 	function checkMail( $val, $option ) {
-		return self::regexp( $val, "[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]+" );
+		return self::pattern( $val, "[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]+" );
 	}
 	// +--------------------------------------------------------------- +
 	/** checks for length of character. 
@@ -137,6 +137,26 @@ class Filter
 			$ok = FALSE;
 		}
 		return $ok;
+	}
+	// +--------------------------------------------------------------- +
+	/**
+	 */
+	function sameas( $val, $option ) {
+        $ok = FALSE;
+        if( $val == $option ) {
+            $ok = TRUE;
+        }
+        return $ok;
+	}
+	// +--------------------------------------------------------------- +
+	/**
+	 */
+	function sameempty( $val, $option ) {
+        $ok = TRUE;
+        if( $val ) {
+            $ok = FALSE;
+        }
+        return $ok;
 	}
 	// +--------------------------------------------------------------- +
 	/**
