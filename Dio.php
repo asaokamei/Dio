@@ -200,6 +200,29 @@ class Dio
 	}
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $data array. 
+	 *  TODO: returns TRUE if value is found and validated. 
+	 *        returns FALSE if value is found and validation fails. 
+	 *        returns NULL if value is not found. 
+	 */
+	function poke( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
+		$filters = self::_getFilter( $filter, $type );
+		$value = self::find( $data, $name, $filters );
+		if( $value === NULL ) {
+			$result = NULL;
+		}
+		else
+		if( !self::validate( $value, $options, $error ) ) {
+			$result = FALSE;
+		}
+		else {
+			$result = TRUE;
+		}
+		return $success;
+	}
+	// +--------------------------------------------------------------- +
+	/** get a validated value in $data array. 
+	 *  TODO: Make sure returns NULL if value is not set in $data, 
+	 *        and returns FALSE if validation fails. 
 	 */
 	function get( $data, $name, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
@@ -221,7 +244,7 @@ class Dio
 	 *  if multiple option is set, get as multiple value. 
 	 *  @return mix value found, FALSE if is not set. 
 	 *
-	 *  TODO: make sure it returns FALSE if value is not set. 
+	 *  TODO: make sure it returns NULL if value is not set. 
 	 *        reduce value to DEFAULT_EMPTY_VALUE if the value 
 	 *        is any of FALSE, '', or NULL. 
 	 */
@@ -295,6 +318,12 @@ class Dio
 	}
 	// +--------------------------------------------------------------- +
 	/** validates a value given list of filters. 
+	 *  @param mix   $value     value to validate and filtered. 
+	 *  @param array $filters   filters to apply to the value. 
+	 *  @param mix   $error     fill in error message if validation fails. 
+	 *  @return boolean 
+	 *          TRUE if validation and all are successful.
+	 *          FALSE if validation fails. 
 	 */
 	function validate( &$value, $filters=array(), &$error ) 
 	{
