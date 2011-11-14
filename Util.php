@@ -7,7 +7,7 @@ class Util
 	/** checks if a variable ($var) have a value (non empty value).
 	 *  returns TRUE if $var==0 as well.
 	 */
-	static isValue( $var, $name=FALSE ) {
+	static function isValue( $var, $name=FALSE ) {
 		if( is_array( $var ) ) { 
 			if( $name === FALSE ) {
 				return( count( $var ) ); 
@@ -34,7 +34,7 @@ class Util
 	 */
 	static function getValue( $arr, $name, $default=FALSE ) {
 		if( isset( $arr[ $name ] ) ) {
-			returns $arr[ $name ];
+			return $arr[ $name ];
 		}
 		return $default;
 	}

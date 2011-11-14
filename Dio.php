@@ -1,5 +1,6 @@
 <?php
 namespace CenaDta\Dio;
+require_once( './Util.php' );
 require_once( './Filter.php' );
 use CenaDta\Dio\Filter as Filter;
 use CenaDta\Dio\Verify as Verify;
@@ -329,7 +330,7 @@ class Dio
 	{
 		// -----------------------------------
 		// build filter list. 
-		$filters = array_merge( static::$default_filters, static::$default_verifies, $filters );
+		$filters = array_merge( self::$default_filters, self::$default_verifies, $filters );
 		// -----------------------------------
 		// filter/verify $value.
 		$success = TRUE;
@@ -359,7 +360,7 @@ class Dio
 		//   0       => global err_msg, 
 		//  'f_name' => filter specific err_msg
 		if( isset( $filters[ 'err_msg' ] ) && 
-			isset( $filters[ 'err_msg' ][ $f_name ] ) {
+			isset( $filters[ 'err_msg' ][ $f_name ] ) ) {
 			$err_msg = $filters[ 'err_msg' ][ $f_name ];
 		}
 		else
@@ -368,12 +369,12 @@ class Dio
 		}
 		else
 		if( isset( $filters[ 'err_msg' ] ) && 
-			isset( $filters[ 'err_msg' ][0] ) {
+			isset( $filters[ 'err_msg' ][0] ) ) {
 			$err_msg = $filters[ 'err_msg' ][0];
 		}
 		else
 		if( isset( $filters[ 'err_msg' ] ) && 
-			!is_array( $filters[ 'err_msg' ] ) {
+			!is_array( $filters[ 'err_msg' ] ) ) {
 			$err_msg = $filters[ 'err_msg' ];
 		}
 		else {
@@ -395,9 +396,10 @@ class Dio
 		// filter/verify value. 
 		if( is_callable( $option ) ) {
 			$success = call_user_func_array( $option, $arg );
+			if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
 		}
 		else
-		if( method_exists( 'Dio', $filter ) ) {
+		if( is_callable( 'self::'.$filter ) ) {
 			$success = Dio::$filter( $value, $arg, $loop );
 			if( WORDY > 5 ) echo "apply Dio::{$filter}, success=$success, value=$value <br />";
 		}
@@ -450,8 +452,8 @@ class Dio
 				$arg = $option;
 			}
 			else
-			if( !is_string( $option ) ) { // hmm not a string. 
-				$arg = $option;  // maybe a function... 
+			if( is_callable( $option ) ) { // wow, it's a function.
+				$arg = $option;
 			}
 			else
 			if( isset( self::$filter_options[ $f_name ][ $option ] ) ) {
@@ -554,7 +556,7 @@ class Dio
 			$charset = $option[ 'charset' ];
 		}
 		else
-		if( have_value( $option ) ) {
+		if( Util::isValue( $option ) ) {
 			$charset = $option;
 		}
 		else
@@ -573,6 +575,7 @@ class Dio
 	/** filters out Null charactor. 
 	 */
 	function noNull( &$value, $option=array() ) {
+		if( WORDY ) echo "noNull( $value, $option )<br />\n";
 		$value = str_replace( "\0", '', $value );
 		return TRUE;
 	}
