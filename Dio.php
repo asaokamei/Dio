@@ -358,26 +358,23 @@ class Dio
 		// build $messages: 
 		//   0       => global err_msg, 
 		//  'f_name' => filter specific err_msg
-		if( isset( $filters[ 'err_msg' ] ) ) {
-			if( is_array( $filters[ 'err_msg' ] ) ) {
-				$messages = $filters[ 'err_msg' ];
-			}
-			else {
-				$messages = array( $filters[ 'err_msg' ] );
-			}
-			$messages = $messages + self::$default_err_msgs;
-		}
-		else {
-			$messages = self::$default_err_msgs;
-		}
-		if( isset( $messages[ $f_name ] ) ) {
-			// filter specific error messages. 
-			$err_msg = $messages[ $f_name ];
+		if( isset( $filters[ 'err_msg' ] ) && 
+			isset( $filters[ 'err_msg' ][ $f_name ] ) {
+			$err_msg = $filters[ 'err_msg' ][ $f_name ];
 		}
 		else
-		if( isset( $messages[ 0 ] ) ) {
-			// global error messages. 
-			$err_msg = $messages[ 0 ];
+		if( isset( self::$default_err_msgs[ $f_name ] ) ) {
+			$err_msg = self::$default_err_msgs[ $f_name ];
+		}
+		else
+		if( isset( $filters[ 'err_msg' ] ) && 
+			isset( $filters[ 'err_msg' ][0] ) {
+			$err_msg = $filters[ 'err_msg' ][0];
+		}
+		else
+		if( isset( $filters[ 'err_msg' ] ) && 
+			!is_array( $filters[ 'err_msg' ] ) {
+			$err_msg = $filters[ 'err_msg' ];
 		}
 		else {
 			$err_msg = "invalid {$f_name}";
