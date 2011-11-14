@@ -90,6 +90,30 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue( $return );
 	}
 	// +----------------------------------------------------------------------+
+	public function test_sameas_staff()
+	{
+		$input    = 'same as';
+		$same_str = $input;
+		$diff_str = 'diff-rent';
+		$return = Dio::filter( $input, 'sameas', $same_str, $error );
+		$this->assertTrue( $return );
+		
+		$return = Dio::filter( $input, 'sameas', $diff_str, $error );
+		$this->assertFalse( $return );
+		
+		$return = Dio::verify( $input, 'asis', array(
+				'sameas' => 'same as'
+			), $error );
+		$this->assertTrue( $return );
+		
+		$return = Dio::verify( $input, 'asis', array(
+			'sameas' => 'different'
+		), $error );
+		$this->assertFalse( $return );
+		$this->assertEquals( Dio::$default_err_msgs[ 'sameas' ], $error );
+		
+	}
+	// +----------------------------------------------------------------------+
 }
 
 

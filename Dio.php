@@ -252,17 +252,20 @@ class Dio
 	 */
 	function find( $data, $name, &$filters=FALSE ) {
 		if( isset( $data[ $name ] ) ) {
+			// simplest case. 
 			$value = $data[ $name ];
 			if( !have_value( $value ) ) $value = self::DEFAULT_EMPTY_VALUE;
 		}
 		else
 		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
+			// case to read such as Y-m-d in three different values. 
 			$value = self::multiple( $data, $name, $filters[ 'multiple' ] );
 		}
 		else {
 			$value = FALSE;
 		}
         if( isset( $filters[ 'samewith' ] ) && $filters[ 'samewith' ] !== FALSE ) {
+			// compare with other inputs as specified by samewith. 
             $sub_filters = $filters;
             $sub_filters[ 'samewith' ] = FALSE;
             $sub_value = self::find( $data, $sub_name, $sub_filters );
