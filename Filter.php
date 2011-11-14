@@ -162,8 +162,9 @@ class Filter
 	/**
 	 */
 	function pattern( $val, $option ) {
+		if( WORDY ) print "pattern( $val, $option )<br />\n";
 		$ok = preg_match( "/^{$option}\$/", $val );
-		return $ok;
+		return !!$ok;
 	}
 	// +--------------------------------------------------------------- +
 }
@@ -242,9 +243,9 @@ class FilterJa extends Filter
 			case 'zen_kana':	$str = 'KVC';		break;
 			default:			$str = 'KV';		break;
 		}
-		echo "$str $val ";
+		//echo "$str $val ";
         $val = mb_convert_kana( $val, $str, 'UTF-8' );
-		echo "$str $val";
+		//echo "$str $val";
         return TRUE;
 	}
 	// +--------------------------------------------------------------- +
