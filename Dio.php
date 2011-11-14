@@ -94,7 +94,7 @@ class Dio
 		'required'    => 'required field',
 		'encoding'    => 'invalid characters',
         'sameas'      => 'values are different',
-        'sameempty'   => 'entery value to compare',
+        'sameempty'   => 'enter value to compare',
 	);
 	// -----------------------------------
 	static $filter_classes = array( 'CenaDta\Dio\Filter', 'CenaDta\Dio\FilterJa' );
@@ -423,6 +423,12 @@ class Dio
 			if( WORDY ) 
 				echo "<font color=red>Dio::filter failed on '$value', " . 
 					 "filter( $filter, $arg ) => $error</font><br/>\n";
+			$success = FALSE;
+		}
+		else 
+		if( $success !== TRUE ) {
+			$success = TRUE;
+			if( WORDY ) echo "filter $filter success but not TRUE\n";
 		}
 		return $success;
 	}

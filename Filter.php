@@ -227,10 +227,11 @@ class FilterJa extends Filter
                 $ereg_str = "";
                 break;
         }
+		$ok = TRUE;
 		if( $ereg_str ) {
-			return mb_ereg( "^{$ereg_str}$", $val );
+			$ok = mb_ereg( "^{$ereg_str}$", $val );
 		}
-		return TRUE;
+		return !!$ok;
 	}
 	// +--------------------------------------------------------------- +
 	/**

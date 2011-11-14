@@ -70,6 +70,24 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$return = Dio::verify( $input, 'mail', array(), $error );
 		$this->assertFalse( $return );
 		
+		$input  = '100';
+		$return = Dio::verify( $input, 'number', array(), $error );
+		$this->assertTrue( $return );
+		
+		$input  = '１００';
+		$origin = $input;
+		$return = Dio::verify( $input, 'number', array(), $error );
+		$this->assertTrue( $return );
+		$this->assertNotEquals( $origin, $input );
+		$this->assertEquals( mb_convert_kana( $origin, 'aks', 'UTF-8' ), $input );
+		
+		$input  = '-100.0';
+		$return = Dio::verify( $input, 'number', array(), $error );
+		$this->assertFalse( $return );
+		
+		$input  = '-100.0';
+		$return = Dio::verify( $input, 'float', array(), $error );
+		$this->assertTrue( $return );
 	}
 	// +----------------------------------------------------------------------+
 }
