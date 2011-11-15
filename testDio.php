@@ -15,6 +15,42 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 	// +----------------------------------------------------------------------+
 	// test suites for htmlForm.
 	// +----------------------------------------------------------------------+
+	public function test_find_method()
+	{
+        // simply find a value.
+        $name = 'test';
+        $value = 'test value';
+        $data = array(
+            $name => $value,
+        );
+        $found = Dio::find( $data, $name );
+		$this->assertEquals( $value, $found );
+        
+        // look for non-existent value, should return FALSE.
+        $found = Dio::find( $data, 'bad_name' );
+		$this->assertNotEquals( $value, $found );
+		$this->assertFalse( $found );
+        
+        // look for non-string value (FALSE), should return ''. 
+        $name = 'test';
+        $value = FALSE;
+        $data = array(
+            $name => $value,
+        );
+        $found = Dio::find( $data, $name );
+		$this->assertTRUE( '' === $found );
+        
+        // make sure find can find '0', and returns '0'.
+        $name = 'test';
+        $value = 0;
+        $data = array(
+            $name => $value,
+        );
+        $found = Dio::find( $data, $name );
+		$this->assertEquals( $value, $found );
+		$this->assertTRUE( "$value" === "$found" );
+    }
+	// +----------------------------------------------------------------------+
 	public function test_applyFilter_method()
 	{
 		// convert a text to upper case. 
@@ -65,7 +101,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
             'date_m' => '11',
             'date_d' => '15'
         );
-        $return = Dio::poke( $bad_source, 'date', $value, 'date', array(), $error );
+        $return = Dio::validate( $bad_source, 'date', $value, 'date', array(), $error );
 		$this->assertEquals( $correct, $value );
 		$this->assertTrue( $return );
 	}

@@ -244,7 +244,14 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** find a value $name in $data array. 
 	 *  if multiple option is set, get as multiple value. 
-	 *  @return mix value found, FALSE if is not set. 
+     * 
+     * @param array  $data    finds value in this array. 
+     * @param string $name    look for $data[ $name ].
+     * @param array $filters  filter to use (multiple and same* filters)
+	 * @return mix 
+     *            returns FALSE if value are not found, 
+     *            returns DEFAULT_EMPTY_VALUE if value is not a string
+     *            returns the found value
 	 *
 	 *  TODO: make sure it returns NULL if value is not set. 
 	 *        reduce value to DEFAULT_EMPTY_VALUE if the value 
