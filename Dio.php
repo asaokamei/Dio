@@ -213,13 +213,13 @@ class Dio
 			$result = NULL;
 		}
 		else
-		if( !self::validate( $value, $options, $error ) ) {
+		if( !self::validate( $value, $filters, $error ) ) {
 			$result = FALSE;
 		}
 		else {
 			$result = TRUE;
 		}
-		return $success;
+		return $result;
 	}
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $data array. 
@@ -229,7 +229,7 @@ class Dio
 	function get( $data, $name, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
 		$value = self::find( $data, $name, $filters );
-		if( !self::validate( $value, $options, $error ) ) {
+		if( !self::validate( $value, $filters, $error ) ) {
 			$value = FALSE;
 		}
 		return $value;
@@ -254,7 +254,7 @@ class Dio
 		if( isset( $data[ $name ] ) ) {
 			// simplest case. 
 			$value = $data[ $name ];
-			if( !have_value( $value ) ) $value = self::DEFAULT_EMPTY_VALUE;
+			if( !Util::isValue( $value ) ) $value = self::DEFAULT_EMPTY_VALUE;
 		}
 		else
 		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
@@ -302,7 +302,7 @@ class Dio
 		$found = FALSE;
 		foreach( $option[ 'suffix' ] as $sfx ) {
 			$name_sfx = $name . $sep . $sfx;
-			$val = self::get( $data, $name_sfx );
+			$val = Util::getValue( $data, $name_sfx, FALSE );
 			if( $val !== FALSE ) {
 				$lists[] = $data[ $name_sfx ];
 				$found   = self::DEFAULT_EMPTY_VALUE;
@@ -319,6 +319,7 @@ class Dio
 		else {
 			$found = implode( $con, $lists );
 		}
+        if( WORDY ) echo "multiple( \$data, $name, \$option ) => $found \n";
 		return $found;
 	}
 	// +--------------------------------------------------------------- +
@@ -512,7 +513,7 @@ class Dio
 	 */
 	function required( $value, $option, &$loop=NULL ) 
 	{
-		if( have_value( $value ) ) { // have value. must be OK...
+		if( Util::isValue( $value ) ) { // have value. must be OK...
 			return TRUE;
 		}
 		$required = FALSE;
@@ -535,7 +536,7 @@ class Dio
 	/** if value is empty, set to default value. 
 	 */
 	function setDefault( &$value, $option, &$loop=NULL ) {
-		if( have_value( $value ) ) { // have value. default is no use...
+		if( Util::isValue( $value ) ) { // have value. default is no use...
 			return TRUE;
 		}
 		if( !is_array( $option ) ) { // default value specified. just use it. 

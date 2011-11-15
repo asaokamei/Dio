@@ -37,6 +37,39 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals( $err_msg, $error );
 	}
 	// +----------------------------------------------------------------------+
+	public function test_multiple_staff()
+	{
+        $source = array( 
+            'date_y' => '2011',
+            'date_m' => '11',
+            'date_d' => '15'
+        );
+        $correct = '2011-11-15';
+        $option = array(
+            'separator' => '_',
+            'connecter' => '-',
+            'suffix'    => array( 'y', 'm', 'd' )
+        );
+        // test multiple method
+        $found = Dio::multiple( $source, 'date', $option );
+		$this->assertEquals( $correct, $found );
+        
+        // test input type=date
+        $return = Dio::poke( $source, 'date', $value, 'date', array(), $error );
+		$this->assertEquals( $correct, $value );
+		$this->assertTrue( $return );
+        
+        // test bad input having NULL
+        $bad_source = array( 
+            'date_y' => '20' . chr(0) . '11',
+            'date_m' => '11',
+            'date_d' => '15'
+        );
+        $return = Dio::poke( $bad_source, 'date', $value, 'date', array(), $error );
+		$this->assertEquals( $correct, $value );
+		$this->assertTrue( $return );
+	}
+	// +----------------------------------------------------------------------+
 	public function test_verify_method()
 	{
 		$input  = 'a text';

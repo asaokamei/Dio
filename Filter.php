@@ -53,11 +53,11 @@ class Filter
 	 *  specify $option[ dbar ] (i.e. '/'.) if date is 'YYYY/MM/DD'. 
 	 */
 	function checkDate( $val, $option ) {
-		if( !have_value( $val ) ) return FALSE;
+		if( !Util::isValue( $val ) ) return FALSE;
 		$dbar = '-';
 		if( isset( $option[ 'dbar' ] ) ) $dbar = $option[ 'dbar' ];
-		list( $year, $month, $day ) = explode( $dbar, $date );
-		if( have_value( $year ) && have_value( $month ) && have_value( $day ) ) {
+		list( $year, $month, $day ) = explode( $dbar, $val );
+		if( Util::isValue( $year ) && Util::isValue( $month ) && Util::isValue( $day ) ) {
 			return @checkdate( $month, $day, $year );
 		}
 		return FALSE;
