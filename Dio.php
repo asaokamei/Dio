@@ -215,14 +215,13 @@ class Dio
 	 *        returns FALSE validation fails. 
 	 */
 	function find( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
-		$filters = self::_getFilter( $filter, $type );
-		$value = self::_find( $data, $name, $filters );
+		$value = self::_find( $data, $name, $filter, $type );
 		if( $value === NULL ) {
             // validate against empty value.
-			$result = self::_validateValue( '', $filters, $error );
+			$result = self::_validateValue( '', $type, $filter, $error );
 		}
 		else {
-			$result = self::_validateValue( $value, $filters, $error );
+			$result = self::_validateValue( $value, $type, $filter, $error );
 		}
 		return $result;
 	}
@@ -258,7 +257,10 @@ class Dio
      *            returns DEFAULT_EMPTY_VALUE if value is not a string
      *            returns the found value
 	 */
-	function _find( $data, $name, &$filters=FALSE ) {
+	function _find( $data, $name, &$filters=FALSE, $type=FALSE ) {
+        if( $type !== FALSE ) {
+    		$filters = self::_getFilter( $filters, $type );
+        }
 		if( isset( $data[ $name ] ) ) {
 			// simplest case. 
 			$value = $data[ $name ];
@@ -344,7 +346,14 @@ class Dio
 	{
 		// -----------------------------------
 		// build filter list. 
-		$filters = array_merge( self::$default_filters, self::$default_verifies, $filters );
+        if( is_array( $filters ) ) {
+    		$filters = array_merge( 
+                self::$default_filters, self::$default_verifies, $filters );
+        }
+        else {
+    		$filters = array_merge( 
+                self::$default_filters, self::$default_verifies );
+        }
 		// -----------------------------------
 		// filter/verify $value.
 		$success = TRUE;
