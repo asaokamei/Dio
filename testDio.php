@@ -23,11 +23,11 @@ class DioDioTest extends PHPUnit_Framework_TestCase
         $data = array(
             $name => $value,
         );
-        $found = Dio::find( $data, $name );
+        $found = Dio::_find( $data, $name );
 		$this->assertEquals( $value, $found );
         
         // look for non-existent value, should return FALSE.
-        $found = Dio::find( $data, 'bad_name' );
+        $found = Dio::_find( $data, 'bad_name' );
 		$this->assertNotEquals( $value, $found );
 		$this->assertFalse( $found );
         
@@ -37,7 +37,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
         $data = array(
             $name => $value,
         );
-        $found = Dio::find( $data, $name );
+        $found = Dio::_find( $data, $name );
 		$this->assertTRUE( '' === $found );
         
         // make sure find can find '0', and returns '0'.
@@ -46,7 +46,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
         $data = array(
             $name => $value,
         );
-        $found = Dio::find( $data, $name );
+        $found = Dio::_find( $data, $name );
 		$this->assertEquals( $value, $found );
 		$this->assertTRUE( "$value" === "$found" );
     }
@@ -91,7 +91,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals( $correct, $found );
         
         // test input type=date
-        $return = Dio::validate( $source, 'date', $value, 'date', array(), $error );
+        $return = Dio::find( $source, 'date', $value, 'date', array(), $error );
 		$this->assertEquals( $correct, $value );
 		$this->assertTrue( $return );
         
@@ -101,7 +101,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
             'date_m' => '11',
             'date_d' => '15'
         );
-        $return = Dio::validate( $bad_source, 'date', $value, 'date', array(), $error );
+        $return = Dio::find( $bad_source, 'date', $value, 'date', array(), $error );
 		$this->assertEquals( $correct, $value );
 		$this->assertTrue( $return );
 	}

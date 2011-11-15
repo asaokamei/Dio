@@ -202,22 +202,27 @@ class Dio
 	}
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $data array. 
-	 *  TODO: returns TRUE if value is found and validated. 
-	 *        returns FALSE if value is found and validation fails. 
-	 *        returns NULL if value is not found. 
+	 *  
+     * @param array $data     look for $name in $data array.
+     * @param string $name    name of value in $data array.
+     * @param mix &$value     value found. 
+     *                        returns NULL if value is not found. 
+     * @param string $type    specify type of value.
+     * @param array $filter   specify extra filter and options.
+     * @param mix &$error     returns error message if validation fails. 
+     * @return boolean
+     *        returns TRUE if value is validated. 
+	 *        returns FALSE validation fails. 
 	 */
-	function validate( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
+	function find( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
-		$value = self::find( $data, $name, $filters );
+		$value = self::_find( $data, $name, $filters );
 		if( $value === NULL ) {
-			$result = NULL;
-		}
-		else
-		if( !self::_validateValue( $value, $filters, $error ) ) {
-			$result = FALSE;
+            // validate against empty value.
+			$result = self::_validateValue( '', $filters, $error );
 		}
 		else {
-			$result = TRUE;
+			$result = self::_validateValue( $value, $filters, $error );
 		}
 		return $result;
 	}
@@ -228,7 +233,7 @@ class Dio
 	 */
 	function get( $data, $name, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
-		$value = self::find( $data, $name, $filters );
+		$value = self::_find( $data, $name, $filters );
 		if( !self::_validateValue( $value, $filters, $error ) ) {
 			$value = FALSE;
 		}
@@ -253,7 +258,7 @@ class Dio
      *            returns DEFAULT_EMPTY_VALUE if value is not a string
      *            returns the found value
 	 */
-	function find( $data, $name, &$filters=FALSE ) {
+	function _find( $data, $name, &$filters=FALSE ) {
 		if( isset( $data[ $name ] ) ) {
 			// simplest case. 
 			$value = $data[ $name ];
@@ -271,7 +276,7 @@ class Dio
 			// compare with other inputs as specified by samewith. 
             $sub_filters = $filters;
             $sub_filters[ 'samewith' ] = FALSE;
-            $sub_value = self::find( $data, $sub_name, $sub_filters );
+            $sub_value = self::_find( $data, $sub_name, $sub_filters );
             if( $sub_value ) {
                 $filters[ 'sameas' ] = $sub_value;
             }
