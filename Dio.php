@@ -196,7 +196,7 @@ class Dio
 	/** validate a value based on type. 
 	 *  filter-verify-value
 	 */
-	function verify( &$value, $type='asis', $filter=array(), &$error=NULL ) {
+	function validate( &$value, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
 		return self::_validateValue( $value, $filters, $error );
 	}

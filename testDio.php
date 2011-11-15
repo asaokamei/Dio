@@ -106,56 +106,56 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue( $return );
 	}
 	// +----------------------------------------------------------------------+
-	public function test_verify_method()
+	public function test_validate_method()
 	{
 		$input  = 'a text';
 		$origin = $input;
-		$return = Dio::verify( $input, 'text', array(), $error );
+		$return = Dio::validate( $input, 'text', array(), $error );
 		$this->assertTrue( $return );
 		$this->assertEquals( $origin, $input );
 		
 		$input  = 'a text';
 		$origin = $input;
-		$return = Dio::verify( $input, 'asis', array(), $error );
+		$return = Dio::validate( $input, 'asis', array(), $error );
 		$this->assertTrue( $return );
 		$this->assertEquals( $origin, $input );
 		
 		$input  = "a " . chr(0) . " text";
 		$origin = $input;
-		$return = Dio::verify( $input, 'asis', array(), $error );
+		$return = Dio::validate( $input, 'asis', array(), $error );
 		$this->assertTrue( $return );
 		$this->assertNotEquals( $origin, $input );
 		$this->assertEquals( str_replace( "\0", '', $origin ), $input );
 		
 		$input  = 'boGus@eXample.com';
 		$origin = $input;
-		$return = Dio::verify( $input, 'mail', array(), $error );
+		$return = Dio::validate( $input, 'mail', array(), $error );
 		$this->assertTrue( $return );
 		$this->assertNotEquals( $origin, $input );
 		$this->assertEquals( strtolower( $origin ), $input );
 		
 		$input  = 'a text';
 		$origin = $input;
-		$return = Dio::verify( $input, 'mail', array(), $error );
+		$return = Dio::validate( $input, 'mail', array(), $error );
 		$this->assertFalse( $return );
 		
 		$input  = '100';
-		$return = Dio::verify( $input, 'number', array(), $error );
+		$return = Dio::validate( $input, 'number', array(), $error );
 		$this->assertTrue( $return );
 		
 		$input  = '１００';
 		$origin = $input;
-		$return = Dio::verify( $input, 'number', array(), $error );
+		$return = Dio::validate( $input, 'number', array(), $error );
 		$this->assertTrue( $return );
 		$this->assertNotEquals( $origin, $input );
 		$this->assertEquals( mb_convert_kana( $origin, 'aks', 'UTF-8' ), $input );
 		
 		$input  = '-100.0';
-		$return = Dio::verify( $input, 'number', array(), $error );
+		$return = Dio::validate( $input, 'number', array(), $error );
 		$this->assertFalse( $return );
 		
 		$input  = '-100.0';
-		$return = Dio::verify( $input, 'float', array(), $error );
+		$return = Dio::validate( $input, 'float', array(), $error );
 		$this->assertTrue( $return );
 	}
 	// +----------------------------------------------------------------------+
@@ -170,12 +170,12 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$return = Dio::_applyFilter( $input, 'sameas', $diff_str, $error );
 		$this->assertFalse( $return );
 		
-		$return = Dio::verify( $input, 'asis', array(
+		$return = Dio::validate( $input, 'asis', array(
 				'sameas' => 'same as'
 			), $error );
 		$this->assertTrue( $return );
 		
-		$return = Dio::verify( $input, 'asis', array(
+		$return = Dio::validate( $input, 'asis', array(
 			'sameas' => 'different'
 		), $error );
 		$this->assertFalse( $return );
