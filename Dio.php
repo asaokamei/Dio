@@ -259,7 +259,7 @@ class Dio
 		else
 		if( isset( $filters[ 'multiple' ] ) && $filters[ 'multiple' ] !== FALSE ) {
 			// case to read such as Y-m-d in three different values. 
-			$value = self::multiple( $data, $name, $filters[ 'multiple' ] );
+			$value = self::_multiple( $data, $name, $filters[ 'multiple' ] );
 		}
 		else {
 			$value = FALSE;
@@ -283,7 +283,7 @@ class Dio
 	 *  not to be used like other filters. 
 	 *  @return mix value found, FALSE if is not set. 
 	 */
-	function multiple( $data, $name, $option ) 
+	function _multiple( $data, $name, $option ) 
 	{
 		// get multiple value as specified by $option. 
 		// $option['suffix']={ $sfx1, $sfx2 }: list of suffix
@@ -319,7 +319,7 @@ class Dio
 		else {
 			$found = implode( $con, $lists );
 		}
-        if( WORDY ) echo "multiple( \$data, $name, \$option ) => $found \n";
+        if( WORDY ) echo "_multiple( \$data, $name, \$option ) => $found \n";
 		return $found;
 	}
 	// +--------------------------------------------------------------- +

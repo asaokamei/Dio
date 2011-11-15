@@ -51,7 +51,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
             'suffix'    => array( 'y', 'm', 'd' )
         );
         // test multiple method
-        $found = Dio::multiple( $source, 'date', $option );
+        $found = Dio::_multiple( $source, 'date', $option );
 		$this->assertEquals( $correct, $found );
         
         // test input type=date
