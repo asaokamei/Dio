@@ -252,10 +252,6 @@ class Dio
      *            returns FALSE if value are not found, 
      *            returns DEFAULT_EMPTY_VALUE if value is not a string
      *            returns the found value
-	 *
-	 *  TODO: make sure it returns NULL if value is not set. 
-	 *        reduce value to DEFAULT_EMPTY_VALUE if the value 
-	 *        is any of FALSE, '', or NULL. 
 	 */
 	function find( $data, $name, &$filters=FALSE ) {
 		if( isset( $data[ $name ] ) ) {
