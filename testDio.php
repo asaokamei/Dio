@@ -15,24 +15,24 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 	// +----------------------------------------------------------------------+
 	// test suites for htmlForm.
 	// +----------------------------------------------------------------------+
-	public function test_filter_method()
+	public function test_applyFilter_method()
 	{
 		// convert a text to upper case. 
 		$input  = 'a text';
 		$origin = $input;
-		$return = Dio::filter( $input, 'upper', TRUE, $error );
+		$return = Dio::_applyFilter( $input, 'upper', TRUE, $error );
 		$this->assertTrue( $return );
 		$this->assertEquals( strtoupper( $origin ), $input );
 		
 		// verify a text is all lower case. 
 		$input  = 'a text';
-		$return = Dio::filter( $input, 'pattern', '[ a-z]*' );
+		$return = Dio::_applyFilter( $input, 'pattern', '[ a-z]*' );
 		$this->assertTrue( $return );
 		
 		// verify a text is not all upper case. and check error message.
 		$input  = 'a text';
 		$err_msg= 'only upper case';
-		$return = Dio::filter( $input, 'pattern', '[A-Z]*', $error, $err_msg );
+		$return = Dio::_applyFilter( $input, 'pattern', '[A-Z]*', $error, $err_msg );
 		$this->assertFalse( $return );
 		$this->assertEquals( $err_msg, $error );
 	}
@@ -55,7 +55,7 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals( $correct, $found );
         
         // test input type=date
-        $return = Dio::poke( $source, 'date', $value, 'date', array(), $error );
+        $return = Dio::validate( $source, 'date', $value, 'date', array(), $error );
 		$this->assertEquals( $correct, $value );
 		$this->assertTrue( $return );
         
@@ -128,10 +128,10 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$input    = 'same as';
 		$same_str = $input;
 		$diff_str = 'diff-rent';
-		$return = Dio::filter( $input, 'sameas', $same_str, $error );
+		$return = Dio::_applyFilter( $input, 'sameas', $same_str, $error );
 		$this->assertTrue( $return );
 		
-		$return = Dio::filter( $input, 'sameas', $diff_str, $error );
+		$return = Dio::_applyFilter( $input, 'sameas', $diff_str, $error );
 		$this->assertFalse( $return );
 		
 		$return = Dio::verify( $input, 'asis', array(

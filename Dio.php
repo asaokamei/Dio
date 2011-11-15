@@ -198,7 +198,7 @@ class Dio
 	 */
 	function verify( &$value, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
-		return self::validate( $value, $filters, $error );
+		return self::_validateValue( $value, $filters, $error );
 	}
 	// +--------------------------------------------------------------- +
 	/** get a validated value in $data array. 
@@ -206,14 +206,14 @@ class Dio
 	 *        returns FALSE if value is found and validation fails. 
 	 *        returns NULL if value is not found. 
 	 */
-	function poke( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
+	function validate( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
 		$value = self::find( $data, $name, $filters );
 		if( $value === NULL ) {
 			$result = NULL;
 		}
 		else
-		if( !self::validate( $value, $filters, $error ) ) {
+		if( !self::_validateValue( $value, $filters, $error ) ) {
 			$result = FALSE;
 		}
 		else {
@@ -229,7 +229,7 @@ class Dio
 	function get( $data, $name, $type='asis', $filter=array(), &$error=NULL ) {
 		$filters = self::_getFilter( $filter, $type );
 		$value = self::find( $data, $name, $filters );
-		if( !self::validate( $value, $filters, $error ) ) {
+		if( !self::_validateValue( $value, $filters, $error ) ) {
 			$value = FALSE;
 		}
 		return $value;
@@ -324,6 +324,7 @@ class Dio
 	}
 	// +--------------------------------------------------------------- +
 	/** validates a value given list of filters. 
+     * 
 	 *  @param mix   $value     value to validate and filtered. 
 	 *  @param array $filters   filters to apply to the value. 
 	 *  @param mix   $error     fill in error message if validation fails. 
@@ -331,7 +332,7 @@ class Dio
 	 *          TRUE if validation and all are successful.
 	 *          FALSE if validation fails. 
 	 */
-	function validate( &$value, $filters=array(), &$error ) 
+	function _validateValue( &$value, $filters=array(), &$error ) 
 	{
 		// -----------------------------------
 		// build filter list. 
@@ -346,7 +347,7 @@ class Dio
 			if( $f_name == 'multiple' ) continue;
 			if( $f_name == 'err_msg'  ) continue;
 			$err_msg = self::_getErrMsg( $filters, $f_name );
-			$success = self::filter( $value, $f_name, $option, $error, $err_msg, $loop );
+			$success = self::_applyFilter( $value, $f_name, $option, $error, $err_msg, $loop );
 			if( !$success ) break;
 			if( $loop == 'break' ) break;
 		}
@@ -389,14 +390,22 @@ class Dio
 		return $err_msg;
 	}
 	// +--------------------------------------------------------------- +
-	/** main verify method for verifying value using this Verify class. 
+	/** apply filter ($f_name with $option) to $value. 
+     * 
+     * @param string $value    value to be filtered. 
+     * @param string $f_name   name of filter. 
+     * @param mix    $option   option for the filter. 
+     * @param mix    $error    fills with $err_msg if filter fails. 
+     * @param string $err_msg  specifies error message when filter fails. 
+     * @param string $loop     optionaly sets to TRUE to break loop.
+     * @return boolean         FALSE if filter fails, otherwise TRUE.  
 	 */ 
-	function filter( &$value, $f_name, $option, &$error=NULL, $err_msg='err', &$loop=NULL ) 
+	function _applyFilter( &$value, $f_name, $option, &$error=NULL, $err_msg='err', &$loop=NULL ) 
 	{
-		if( WORDY > 5 ) {  echo "filter( '$value', $f_name, $option, $err_msg )<br/>"; };
+		if( WORDY > 5 ) {  echo "_applyFilter( '$value', $f_name, $option, $err_msg )<br/>"; };
 		$success = TRUE;
 		self::_getFilterFunc( $f_name, $option, $filter, $arg );
-		if( WORDY > 3 ) {  echo "filter( '$value', $f_name, $arg )<br/>"; };
+		if( WORDY > 3 ) {  echo "_applyFilter( '$value', $f_name, $arg, $err_msg )<br/>"; };
 		// -----------------------------------
 		// filter/verify value. 
 		if( is_callable( $option ) ) {
@@ -425,7 +434,7 @@ class Dio
 				$err_msg = "error@{$f_name}";
 			}
 			if( WORDY ) 
-				echo "<font color=red>Dio::filter failed on '$value', " . 
+				echo "<font color=red>Dio::_applyFilter failed on '$value', " . 
 					 "filter( $filter, $arg ) => $error</font><br/>\n";
 			$success = FALSE;
 		}

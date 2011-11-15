@@ -23,7 +23,7 @@ class Data
 	// +--------------------------------------------------------------- +
 	function push( $name, $type='asis', $filter=array() ) {
 		foreach( $this->data_source as $title => $src ) {
-			$result = Dio::poke( $src, $name, $val, $type, $filter, $err );
+			$result = Dio::validate( $src, $name, $val, $type, $filter, $err );
 			if( $result === NULL ) {
 				continue;
 			}
