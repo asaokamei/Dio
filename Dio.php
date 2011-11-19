@@ -4,6 +4,7 @@ require_once( './Util.php' );
 require_once( './Filter.php' );
 use CenaDta\Dio\Filter as Filter;
 use CenaDta\Dio\Verify as Verify;
+Dio::__init( array() );
 
 class Dio
 {
@@ -23,6 +24,7 @@ class Dio
 			  'noNull'      => TRUE,
 			  'encoding'    => 'UTF-8',
 			  'mbConvert'   => 'standard', 
+              'trim'        => TRUE,
 			  'sanitize'    => FALSE,
 			  'date'        => FALSE,
 			  'time'        => FALSE,
@@ -115,7 +117,11 @@ class Dio
 				),
 		*/
 		// filters for email type.
-		'asis'  => array(),
+		'asis'  => array(
+              'trim'        => FALSE,
+            ),
+		'text'  => array(
+            ),
 		'mail'  => 
 			array(
 				'mbConvert'  => 'hankaku',
@@ -182,6 +188,17 @@ class Dio
 				'datetype'  => 'dt',
 			),
 		);
+	// +--------------------------------------------------------------- +
+	/** create filters array for given type and optional filters.
+	 */
+	function __init( $options ) {
+        //return;
+        self::$filter_options[ 'trim' ] = 
+            function( &$val, $opt=NULL ) {
+                $val = trim( $val );
+                return TRUE;
+            };
+	}
 	// +--------------------------------------------------------------- +
 	/** create filters array for given type and optional filters.
 	 */
@@ -425,6 +442,11 @@ class Dio
 		if( WORDY > 3 ) {  echo "_applyFilter( '$value', $f_name, $arg, $err_msg )<br/>"; };
 		// -----------------------------------
 		// filter/verify value. 
+		if( is_callable( $filter ) ) {
+			$success = $filter( $value, $arg );
+			if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
+		}
+		else
 		if( is_callable( $option ) ) {
 			$success = call_user_func_array( $option, $arg );
 			if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
@@ -468,42 +490,41 @@ class Dio
 	function _getFilterFunc( $f_name, $option, &$filter, &$arg ) 
 	{
 		if( WORDY > 5 ) {  echo "filter( $f_name )"; var_dump( $option ); };
-		$filter = $f_name;
-		$arg = $option;
 		// -----------------------------------
 		// determine real $filter from $f_name and $option. 
-		if( !isset( self::$filter_options[ $f_name ] ) ) {
-			// $f_name is not listed in filter option; use as is. 
+   		$filter = $f_name;
+		if( isset( self::$filter_options[ $f_name ] ) ) {
+            // overwrite f_name with filter_options
+            if( !is_array( self::$filter_options[ $f_name ] ) ) {
+                // it's a string. use the name in the filter list. 
+                $filter = self::$filter_options[ $f_name ];
+            }
+            else 
+            if( isset( self::$filter_options[ $f_name ][0] ) ) {
+                // found array info in the filter list.
+                // the first item is always the filter name. 
+                $filter = self::$filter_options[ $f_name ][0];
+            }
 		}
-		else 
-		if( !is_array( self::$filter_options[ $f_name ] ) ) {
-			// it's a string. use the name in the filter list. 
-			$filter = self::$filter_options[ $f_name ];
-		}
-		else { 
-			// found array info in the filter list.
-			// the first item is always the filter name. 
-			$filter = self::$filter_options[ $f_name ][0];
-			// now, get the option. 
-			if( is_array( $option ) ) { // use array as is.
-				$arg = $option;
-			}
-			else
-			if( is_callable( $option ) ) { // wow, it's a function.
-				$arg = $option;
-			}
-			else
-			if( isset( self::$filter_options[ $f_name ][ $option ] ) ) {
-				// use predefined option. 
-				$arg = self::$filter_options[ $f_name ][ $option ];
-			}
-			else 
-			if( isset( self::$filter_options[ $f_name ][1] ) ) {
-				// use option in filter_potions...
-				$arg = self::$filter_options[ $f_name ][1];
-			}
-			// use option as is. 
-		}
+		// -----------------------------------
+		// now, get the option. 
+		$arg = $option;
+        if(is_callable( $option ) ) {
+            // do nothing. 
+        }
+        if( isset( self::$filter_options[ $f_name ] ) && 
+            is_array( self::$filter_options[ $f_name ] ) ) {
+            // check for more options.
+            if( isset( self::$filter_options[ $f_name ][ $option ] ) ) {
+                // use predefined option. 
+                $arg = self::$filter_options[ $f_name ][ $option ];
+            }
+            else 
+            if( isset( self::$filter_options[ $f_name ][1] ) ) {
+                // use option in filter_potions...
+                $arg = self::$filter_options[ $f_name ][1];
+            }
+        }
 		if( WORDY > 5 ) {  echo "_getFilterFunc( $f_name, $option, &$filter, &$arg )<br/>"; };
 	}
 	// +--------------------------------------------------------------- +

@@ -6,7 +6,7 @@ class Filter
 	// +--------------------------------------------------------------- +
 	// FILTER METHODS!!!
 	// +--------------------------------------------------------------- +
-	function trim( &$value, $option=array() ) {
+	function xxtrim( &$value, $option=array() ) {
 		$value = trim( $value );
 		return TRUE;
 	}

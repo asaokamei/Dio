@@ -11,6 +11,13 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 	}
 	public function test_min()
 	{
+        $input  = ' a test ';
+		$origin = $input;
+		$return = Dio::validate( $input, 'text', array(), $error );
+		$this->assertTrue( $return );
+		$this->assertNotEquals( $origin, $input );
+		$this->assertEquals( trim( $origin ), $input );
+        //$this->assertTrue( phpversion() );
 	}
 	// +----------------------------------------------------------------------+
 	// test suites for htmlForm.
@@ -127,6 +134,13 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertNotEquals( $origin, $input );
 		$this->assertEquals( str_replace( "\0", '', $origin ), $input );
 		
+        $input  = ' a test ';
+		$origin = $input;
+		$return = Dio::validate( $input, 'text', array(), $error );
+		$this->assertTrue( $return );
+		$this->assertNotEquals( $origin, $input );
+		$this->assertEquals( trim( $origin ), $input );
+        
 		$input  = 'boGus@eXample.com';
 		$origin = $input;
 		$return = Dio::validate( $input, 'mail', array(), $error );
