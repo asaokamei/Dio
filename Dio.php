@@ -65,28 +65,33 @@ class Dio
 	 *
 	 */
 	static $filter_options = array(
-		'default'     => array( 'setDefault' ),
-		'lower'       => array( 'string',   'lower' ),
-		'upper'       => array( 'string',   'upper' ),
-		'capital'     => array( 'string',   'capital' ),
-		'code'        => array( 'pattern',  '[-_0-9a-zA-Z]*'
+		'pattern'     => 'CenaDTA\Dio\Filter::pattern',
+		'lower'       => array( 'CenaDTA\Dio\Filter::string',   'lower' ),
+		'upper'       => array( 'CenaDTA\Dio\Filter::string',   'upper' ),
+		'capital'     => array( 'CenaDTA\Dio\Filter::string',   'capital' ),
+		'code'        => array( 'CenaDTA\Dio\Filter::pattern',  '[-_0-9a-zA-Z]*'
 							  ),
-		'datetype'    => array( 'pattern', 
+		'datetype'    => array( 'CenaDTA\Dio\Filter::pattern', 
 								'ymd'  => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
 								'ym'   => '[0-9]{4}-[0-9]{2}',
 								'His'  => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
 								'Hi'   => '[0-9]{2}:[0-9]{2}',
 								'dt'   => '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}',
 							  ),
-		'number'      => array( 'pattern',  
-								'[-0-9]*', 
+		'number'      => array( 'CenaDTA\Dio\Filter::pattern', '[-0-9]*', 
 								'number' => '[0-9]*',
 								'int'    => '[-]{0,1}[0-9]*',
 								'float'  => '[-]{0,1}[.0-9]*', 
 							  ),
-		'jaKatakana'  => array( 'mbJaKana', 'standard' ),
-		'hankaku'     => array( 'mbJaKana', 'hankaku' ),
-		'hankana'     => array( 'mbJaKana', 'hankana' ),
+		'jaKatakana'  => array( 'CenaDTA\Dio\FilterJa::mbJaKana', 'standard' ),
+		'hankaku'     => array( 'CenaDTA\Dio\FilterJa::mbJaKana', 'hankaku' ),
+		'hankana'     => array( 'CenaDTA\Dio\FilterJa::mbJaKana', 'hankana' ),
+        'sameas'      => 'CenaDTA\Dio\Filter::sameas',
+        'string'      => 'CenaDTA\Dio\Filter::string',
+        'sanitize'    => 'CenaDTA\Dio\Filter::sanitize',
+        'checkMail'   => 'CenaDTA\Dio\Filter::checkMail',
+        'mbConvert'   => 'CenaDTA\Dio\FilterJa::mbConvert',
+        'mbCheckKana' => 'CenaDTA\Dio\FilterJa::mbCheckKana',
 	);
 	
 	// -----------------------------------
@@ -196,6 +201,57 @@ class Dio
         self::$filter_options[ 'trim' ] = 
             function( &$val, $opt=NULL ) {
                 $val = trim( $val );
+                return TRUE;
+            };
+    	// -----------------------------------
+        /** sets default if empty. 
+         */
+        self::$filter_options[ 'default' ] = 
+			function( &$value, $option, &$loop=NULL ) {
+                if( !Util::isValue( $value ) ) { // no value. set default...
+                    if( !is_array( $option ) ) { // default value specified.
+                        $value = $option;
+                    }
+                    else
+                    if( isset( $option[ 'value' ] ) ) { 
+                        $value = $option[ 'value' ];
+                    }
+                    if( $option[ 'break' ] ) {
+                        $loop = 'break';
+                    }
+                }
+                return TRUE;
+            };
+    	// -----------------------------------
+        /** removes null (char(0)). 
+         */
+        self::$filter_options[ 'noNull'  ] = 
+			function( &$value, $option=array() ) {
+				$value = str_replace( "\0", '', $value );
+				return TRUE;
+			};
+    	// -----------------------------------
+        /** completely filters out if bad encoding. 
+         */
+        self::$filter_options[ 'encoding'  ] = 
+            function( &$value, $option=array(), &$loop=NULL ) {
+                if( is_array( $option ) && isset( $option[ 'charset' ] ) ) {
+                    $charset = $option[ 'charset' ];
+                }
+                else
+                if( Util::isValue( $option ) ) {
+                    $charset = $option;
+                }
+                else
+                if( mb_internal_encoding() ) {
+                    $charset = mb_internal_encoding();
+                }
+                else {
+                    $charset = self::$default_charset;
+                }
+                if( !mb_check_encoding( $value, $charset ) ) {
+                    $value = '';
+                }
                 return TRUE;
             };
 	}
@@ -443,28 +499,30 @@ class Dio
 		// -----------------------------------
 		// filter/verify value. 
 		if( is_callable( $filter ) ) {
-			$success = $filter( $value, $arg );
+			$success = call_user_func_array( $filter, array( &$value, $arg, &$loop ) );
 			if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
 		}
 		else
 		if( is_callable( $option ) ) {
-			$success = call_user_func_array( $option, $arg );
+			$success = call_user_func_array( $option, array( &$value, $arg ) );
 			if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
 		}
-		else
-		if( is_callable( 'self::'.$filter ) ) {
-			$success = Dio::$filter( $value, $arg, $loop );
-			if( WORDY > 5 ) echo "apply Dio::{$filter}, success=$success, value=$value <br />";
-		}
 		else {
-			foreach( self::$filter_classes as $class ) {
-				if( method_exists( $class, $filter ) ) {
-					$success = $class::$filter( $value, $arg );
-					if( WORDY > 3 ) echo "apply {$class}::{$filter}( $arg ) success=$success, value=$value <br />";
-					break;
-				}
-			}
-		}
+            throw new \Exception( "$filter not found as standard way." );
+            if( is_callable( 'self::'.$filter ) ) {
+                $success = Dio::$filter( $value, $arg, $loop );
+                if( WORDY > 5 ) echo "apply Dio::{$filter}, success=$success, value=$value <br />";
+            }
+            else {
+                foreach( self::$filter_classes as $class ) {
+                    if( method_exists( $class, $filter ) ) {
+                        $success = $class::$filter( $value, $arg );
+                        if( WORDY > 3 ) echo "apply {$class}::{$filter}( $arg ) success=$success, value=$value <br />";
+                        break;
+                    }
+                }
+            }
+        }
 		if( !$success ) { // it's an error. set an error message in $error.
 			if( $err_msg ) { // use err_msg in option. 
 				$error = $err_msg;
@@ -495,8 +553,12 @@ class Dio
    		$filter = $f_name;
 		if( isset( self::$filter_options[ $f_name ] ) ) {
             // overwrite f_name with filter_options
-            if( !is_array( self::$filter_options[ $f_name ] ) ) {
+            if( is_callable( self::$filter_options[ $f_name ] ) ) {
                 // it's a string. use the name in the filter list. 
+                $filter = self::$filter_options[ $f_name ];
+            }
+            else
+            if( !is_array( self::$filter_options[ $f_name ] ) ) {
                 $filter = self::$filter_options[ $f_name ];
             }
             else 
@@ -512,6 +574,7 @@ class Dio
         if(is_callable( $option ) ) {
             // do nothing. 
         }
+        else
         if( isset( self::$filter_options[ $f_name ] ) && 
             is_array( self::$filter_options[ $f_name ] ) ) {
             // check for more options.
@@ -577,64 +640,6 @@ class Dio
 			}
 			return FALSE;
 		}
-		return TRUE;
-	}
-	// +--------------------------------------------------------------- +
-	/** if value is empty, set to default value. 
-	 */
-	function setDefault( &$value, $option, &$loop=NULL ) {
-		if( Util::isValue( $value ) ) { // have value. default is no use...
-			return TRUE;
-		}
-		if( !is_array( $option ) ) { // default value specified. just use it. 
-			$value = $option;
-			return TRUE;
-		}
-		if( $option[ 'default' ] ) { // more complex option here. 
-			$value = $option[ 'default' ];
-		}
-		if( $option[ 'break' ]) {
-			$loop = 'break';
-		}
-		return TRUE;
-	}
-	// +--------------------------------------------------------------- +
-	/** minimum security filter. 
-	 */
-	function secure( &$value, $option=array(), &$loop=NULL ) {
-		$val = self::encoding( $value, $option );
-		$val = self::noNull( $value,   $option );
-		return TRUE;
-	}
-	// +--------------------------------------------------------------- +
-	/** completely filters out if bad encoding. 
-	 */
-	function encoding( &$value, $option=array(), &$loop=NULL ) {
-		if( is_array( $option ) && isset( $option[ 'charset' ] ) ) {
-			$charset = $option[ 'charset' ];
-		}
-		else
-		if( Util::isValue( $option ) ) {
-			$charset = $option;
-		}
-		else
-		if( mb_internal_encoding() ) {
-			$charset = mb_internal_encoding();
-		}
-		else {
-			$charset = self::$default_charset;
-		}
-		if( !mb_check_encoding( $value, $charset ) ) {
-			$value = '';
-		}
-		return TRUE;
-	}
-	// +--------------------------------------------------------------- +
-	/** filters out Null charactor. 
-	 */
-	function noNull( &$value, $option=array() ) {
-		if( WORDY ) echo "noNull( $value, $option )<br />\n";
-		$value = str_replace( "\0", '', $value );
 		return TRUE;
 	}
 	// +--------------------------------------------------------------- +
