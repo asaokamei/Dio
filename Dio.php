@@ -200,7 +200,11 @@ class Dio
     function __init( $options=NULL ) {
     }
     // +--------------------------------------------------------------- +
-    /** create filters array for given type and optional filters.
+    /** create filters for given type and extra filter.
+     * 
+     * @param array $filter   array of extra filter
+     * @param string $type    filter type 
+     * @return array          returns filters for the type.
      */
     function _getFilter( $filter, $type ) {
         if( !isset( self::$filters[ $type ] ) ) {
@@ -211,7 +215,14 @@ class Dio
     }
     // +--------------------------------------------------------------- +
     /** validate a value based on type. 
-     *  filter-verify-value
+     * 
+     * @param mix &$value    value to validate
+     * @param string $type   type of value ('text', 'mail', etc.)
+     * @param array $filter  array of extra filters to apply.
+     * @param mix &error     error message if validation fails.
+     * @return boolean 
+     *          TRUE if validation and all are successful.
+     *          FALSE if validation fails. 
      */
     function validate( &$value, $type='asis', $filter=array(), &$error=NULL ) {
         $filters = self::_getFilter( $filter, $type );
