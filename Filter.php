@@ -6,10 +6,58 @@ class Filter
 	// +--------------------------------------------------------------- +
 	// FILTER METHODS!!!
 	// +--------------------------------------------------------------- +
-	function xxtrim( &$value, $option=array() ) {
+	function trim( &$value, $option=NULL ) {
 		$value = trim( $value );
 		return TRUE;
 	}
+	// +--------------------------------------------------------------- +
+    /** sets default if empty. 
+     */
+    function setDefault( &$value, $option, &$loop=NULL ) {
+        if( !Util::isValue( $value ) ) { // no value. set default...
+            if( !is_array( $option ) ) { // default value specified.
+                $value = $option;
+            }
+            else
+            if( isset( $option[ 'value' ] ) ) { 
+                $value = $option[ 'value' ];
+            }
+            if( $option[ 'break' ] ) {
+                $loop = 'break';
+            }
+        }
+        return TRUE;
+    }
+	// +--------------------------------------------------------------- +
+    /** removes null (char(0)). 
+     */
+    function noNull( &$value, $option=NULL ) {
+        $value = str_replace( "\0", '', $value );
+        return TRUE;
+    }
+	// +--------------------------------------------------------------- +
+    /** completely filters out if bad encoding. 
+     */
+    function encoding( &$value, $option=NULL, &$loop=NULL ) {
+        if( is_array( $option ) && isset( $option[ 'charset' ] ) ) {
+            $charset = $option[ 'charset' ];
+        }
+        else
+        if( Util::isValue( $option ) ) {
+            $charset = $option;
+        }
+        else
+        if( mb_internal_encoding() ) {
+            $charset = mb_internal_encoding();
+        }
+        else {
+            $charset = self::$default_charset;
+        }
+        if( !mb_check_encoding( $value, $charset ) ) {
+            $value = '';
+        }
+        return TRUE;
+    }
 	// +--------------------------------------------------------------- +
 	function string( &$value, $option=array() ) {
 		if( WORDY > 5 ) echo "string( $value, $option )";

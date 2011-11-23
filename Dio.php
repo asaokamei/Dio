@@ -65,6 +65,10 @@ class Dio
 	 *
 	 */
 	static $filter_options = array(
+        'trim'        => 'CenaDTA\Dio\Filter::trim',
+        'default'     => 'CenaDTA\Dio\Filter::setDefault',
+        'noNull'      => 'CenaDTA\Dio\Filter::noNull',
+        'encoding'    => 'CenaDTA\Dio\Filter::encoding',
 		'pattern'     => 'CenaDTA\Dio\Filter::pattern',
 		'lower'       => array( 'CenaDTA\Dio\Filter::string',   'lower' ),
 		'upper'       => array( 'CenaDTA\Dio\Filter::string',   'upper' ),
@@ -196,64 +200,7 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/** create filters array for given type and optional filters.
 	 */
-	function __init( $options ) {
-        //return;
-        self::$filter_options[ 'trim' ] = 
-            function( &$val, $opt=NULL ) {
-                $val = trim( $val );
-                return TRUE;
-            };
-    	// -----------------------------------
-        /** sets default if empty. 
-         */
-        self::$filter_options[ 'default' ] = 
-			function( &$value, $option, &$loop=NULL ) {
-                if( !Util::isValue( $value ) ) { // no value. set default...
-                    if( !is_array( $option ) ) { // default value specified.
-                        $value = $option;
-                    }
-                    else
-                    if( isset( $option[ 'value' ] ) ) { 
-                        $value = $option[ 'value' ];
-                    }
-                    if( $option[ 'break' ] ) {
-                        $loop = 'break';
-                    }
-                }
-                return TRUE;
-            };
-    	// -----------------------------------
-        /** removes null (char(0)). 
-         */
-        self::$filter_options[ 'noNull'  ] = 
-			function( &$value, $option=array() ) {
-				$value = str_replace( "\0", '', $value );
-				return TRUE;
-			};
-    	// -----------------------------------
-        /** completely filters out if bad encoding. 
-         */
-        self::$filter_options[ 'encoding'  ] = 
-            function( &$value, $option=array(), &$loop=NULL ) {
-                if( is_array( $option ) && isset( $option[ 'charset' ] ) ) {
-                    $charset = $option[ 'charset' ];
-                }
-                else
-                if( Util::isValue( $option ) ) {
-                    $charset = $option;
-                }
-                else
-                if( mb_internal_encoding() ) {
-                    $charset = mb_internal_encoding();
-                }
-                else {
-                    $charset = self::$default_charset;
-                }
-                if( !mb_check_encoding( $value, $charset ) ) {
-                    $value = '';
-                }
-                return TRUE;
-            };
+	function __init( $options=NULL ) {
 	}
 	// +--------------------------------------------------------------- +
 	/** create filters array for given type and optional filters.
