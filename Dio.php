@@ -424,7 +424,8 @@ class Dio
             if( $f_name == 'multiple' ) continue;
             if( $f_name == 'err_msg'  ) continue;
             $err_msg = self::_getErrMsg( $filters, $f_name );
-            $success = self::_applyFilter( $value, $f_name, $option, $error, $err_msg, $loop );
+            self::_getFilterFunc( $f_name, $option, $func, $arg );
+            $success = self::_applyFilter( $value, $func, $arg, $error, $err_msg, $loop );
             if( !$success ) break;
             if( $loop == 'break' ) break;
         }
@@ -470,32 +471,30 @@ class Dio
     /** apply filter ($f_name with $option) to $value. 
      * 
      * @param string $value    value to be filtered. 
-     * @param string $f_name   name of filter. 
-     * @param mix    $option   option for the filter. 
+     * @param string $func     filter function. 
+     * @param mix    $arg      argument for the function. 
      * @param mix    $error    fills with $err_msg if filter fails. 
      * @param string $err_msg  specifies error message when filter fails. 
      * @param string $loop     optionaly sets to TRUE to break loop.
      * @return boolean         FALSE if filter fails, otherwise TRUE.  
      */ 
-    function _applyFilter( &$value, $f_name, $option, &$error=NULL, $err_msg='err', &$loop=NULL ) 
+    function _applyFilter( &$value, $func, $arg, &$error=NULL, $err_msg='err', &$loop=NULL ) 
     {
-        if( WORDY > 5 ) {  echo "_applyFilter( '$value', $f_name, $option, $err_msg )<br/>"; };
+        if( WORDY > 3 ) {  echo "_applyFilter( '$value', $func, $arg, $err_msg )<br/>"; };
         $success = TRUE;
-        self::_getFilterFunc( $f_name, $option, $filter, $arg );
-        if( WORDY > 3 ) {  echo "_applyFilter( '$value', $f_name, $arg, $err_msg )<br/>"; };
         // -----------------------------------
         // filter/verify value. 
-        if( is_callable( $filter ) ) {
-            $success = call_user_func_array( $filter, array( &$value, $arg, &$loop ) );
+        if( is_callable( $func ) ) {
+            $success = call_user_func_array( $func, array( &$value, $arg, &$loop ) );
             if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
         }
         else
-        if( is_callable( $option ) ) {
-            $success = call_user_func_array( $option, array( &$value, $arg ) );
+        if( is_callable( $arg ) ) {
+            $success = call_user_func_array( $arg, array( &$value, $arg ) );
             if( WORDY > 5 ) echo "apply function, success=$success, value=$value <br />";
         }
         else {
-            throw new \Exception( "$filter not found as standard way." );
+            throw new \Exception( "$func filter not found." );
         }
         if( !$success ) { // it's an error. set an error message in $error.
             if( $err_msg ) { // use err_msg in option. 
@@ -506,13 +505,13 @@ class Dio
             }
             if( WORDY ) 
                 echo "<font color=red>Dio::_applyFilter failed on '$value', " . 
-                     "filter( $filter, $arg ) => $error</font><br/>\n";
+                     "filter( $func, $arg ) => $error</font><br/>\n";
             $success = FALSE;
         }
         else 
         if( $success !== TRUE ) {
             $success = TRUE;
-            if( WORDY ) echo "filter $filter success but not TRUE\n";
+            if( WORDY ) echo "filter $func success but not TRUE\n";
         }
         return $success;
     }

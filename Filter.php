@@ -6,7 +6,7 @@ class Filter
     // +--------------------------------------------------------------- +
     // FILTER METHODS!!!
     // +--------------------------------------------------------------- +
-    function trim( &$value, $option=NULL ) {
+    function trim( &$value ) {
         $value = trim( $value );
         return TRUE;
     }
@@ -38,7 +38,7 @@ class Filter
     // +--------------------------------------------------------------- +
     /** completely filters out if bad encoding. 
      */
-    function encoding( &$value, $option=NULL, &$loop=NULL ) {
+    function encoding( &$value, $option=NULL ) {
         if( is_array( $option ) && isset( $option[ 'charset' ] ) ) {
             $charset = $option[ 'charset' ];
         }
