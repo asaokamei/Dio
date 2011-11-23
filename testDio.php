@@ -1,4 +1,5 @@
 <?php
+error_reporting( E_ALL );
 require_once( dirname( __FILE__ ) . "/Dio.php" );
 use CenaDTA\Dio\Dio as Dio;
 define( 'WORDY', 0 );
