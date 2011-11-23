@@ -2,9 +2,6 @@
 namespace CenaDta\Dio;
 require_once( './Util.php' );
 require_once( './Filter.php' );
-use CenaDta\Dio\Filter as Filter;
-use CenaDta\Dio\Verify as Verify;
-Dio::__init( array() );
 
 class Dio
 {
