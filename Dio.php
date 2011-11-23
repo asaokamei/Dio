@@ -69,6 +69,7 @@ class Dio
         'default'     => 'CenaDTA\Dio\Filter::setDefault',
         'noNull'      => 'CenaDTA\Dio\Filter::noNull',
         'encoding'    => 'CenaDTA\Dio\Filter::encoding',
+        'required'    => 'CenaDTA\Dio\Filter::required',
 		'pattern'     => 'CenaDTA\Dio\Filter::pattern',
 		'lower'       => array( 'CenaDTA\Dio\Filter::string',   'lower' ),
 		'upper'       => array( 'CenaDTA\Dio\Filter::string',   'upper' ),
@@ -107,8 +108,6 @@ class Dio
         'sameas'      => 'values are different',
         'sameempty'   => 'enter value to compare',
 	);
-	// -----------------------------------
-	static $filter_classes = array( 'CenaDta\Dio\Filter', 'CenaDta\Dio\FilterJa' );
 	
 	// -----------------------------------
 	static $filters = array(
@@ -456,19 +455,6 @@ class Dio
 		}
 		else {
             throw new \Exception( "$filter not found as standard way." );
-            if( is_callable( 'self::'.$filter ) ) {
-                $success = Dio::$filter( $value, $arg, $loop );
-                if( WORDY > 5 ) echo "apply Dio::{$filter}, success=$success, value=$value <br />";
-            }
-            else {
-                foreach( self::$filter_classes as $class ) {
-                    if( method_exists( $class, $filter ) ) {
-                        $success = $class::$filter( $value, $arg );
-                        if( WORDY > 3 ) echo "apply {$class}::{$filter}( $arg ) success=$success, value=$value <br />";
-                        break;
-                    }
-                }
-            }
         }
 		if( !$success ) { // it's an error. set an error message in $error.
 			if( $err_msg ) { // use err_msg in option. 
@@ -542,12 +528,6 @@ class Dio
 	// +--------------------------------------------------------------- +
 	/**
 	 */
-	function setFilterClass( $class ) {
-		static::$filter_classes[] = array_merge( array( $class ), static::$filter_classes );
-	}
-	// +--------------------------------------------------------------- +
-	/**
-	 */
 	function addFilterMethods( $name, $method ) {
 		static::$default_filters[ $name ] = $method;
 	}
@@ -562,32 +542,6 @@ class Dio
 	 */
 	function addFilterOptions( $name, $option ) {
 		static::$filter_options[ $name ] = $option;
-	}
-	// +--------------------------------------------------------------- +
-	//  preset validator and filter's.
-	// +--------------------------------------------------------------- +
-	/** verifies if required value has a value. 
-	 */
-	function required( $value, $option, &$loop=NULL ) 
-	{
-		if( Util::isValue( $value ) ) { // have value. must be OK...
-			return TRUE;
-		}
-		$required = FALSE;
-		if( !is_array( $option ) && $option ) { // required value not there.
-			$required = TRUE;
-		}
-		else
-		if( isset( $option[ 'required' ] ) && $option[ 'required' ] ) {
-			$required = TRUE;
-		}
-		if( $required ) {
-			if( isset( $option[ 'loop' ] ) && $option[ 'loop' ] == 'break' ) {
-				$loop = 'break';
-			}
-			return FALSE;
-		}
-		return TRUE;
 	}
 	// +--------------------------------------------------------------- +
 }

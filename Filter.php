@@ -59,6 +59,30 @@ class Filter
         return TRUE;
     }
 	// +--------------------------------------------------------------- +
+	/** verifies if required value has a value. 
+	 */
+	function required( $value, $option, &$loop=NULL ) 
+	{
+		if( Util::isValue( $value ) ) { // have value. must be OK...
+			return TRUE;
+		}
+		$required = FALSE;
+		if( !is_array( $option ) && $option ) { // required value not there.
+			$required = TRUE;
+		}
+		else
+		if( isset( $option[ 'required' ] ) && $option[ 'required' ] ) {
+			$required = TRUE;
+		}
+		if( $required ) {
+			if( isset( $option[ 'loop' ] ) && $option[ 'loop' ] == 'break' ) {
+				$loop = 'break';
+			}
+			return FALSE;
+		}
+		return TRUE;
+	}
+	// +--------------------------------------------------------------- +
 	function string( &$value, $option=array() ) {
 		if( WORDY > 5 ) echo "string( $value, $option )";
 		if( $option == 'lower' ) {
