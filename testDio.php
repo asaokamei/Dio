@@ -174,6 +174,15 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue( $return );
 	}
 	// +----------------------------------------------------------------------+
+	public function test_arrayInput_staff()
+	{
+        $input = array( '1', ' 2', 'x', '4' );
+		$return = Dio::validate( $input, 'number', array(), $error );
+		$this->assertFalse( !!$return );
+		$this->assertEquals( 'enter a number', $error[2] );
+		$this->assertEquals( '2', $input[1] );
+	}
+	// +----------------------------------------------------------------------+
 	public function test_sameas_staff()
 	{
 		$input    = 'same as';

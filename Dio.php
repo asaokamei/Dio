@@ -444,6 +444,7 @@ class Dio
         //   0       => global err_msg, 
         //  'f_name' => filter specific err_msg
         if( isset( $filters[ 'err_msg' ] ) && 
+            is_array( $filters[ 'err_msg' ] ) && 
             isset( $filters[ 'err_msg' ][ $f_name ] ) ) {
             $err_msg = $filters[ 'err_msg' ][ $f_name ];
         }
@@ -453,6 +454,7 @@ class Dio
         }
         else
         if( isset( $filters[ 'err_msg' ] ) && 
+            is_array ( $filters[ 'err_msg' ] ) &&
             isset( $filters[ 'err_msg' ][0] ) ) {
             $err_msg = $filters[ 'err_msg' ][0];
         }
@@ -482,6 +484,15 @@ class Dio
     {
         if( WORDY > 3 ) {  echo "_applyFilter( '$value', $func, $arg, $err_msg )<br/>"; };
         $success = TRUE;
+        if( is_array( $value ) && !empty( $value ) ) {
+            foreach( $value as $key => $val ) {
+                if( !is_array( $error ) ) $error = array();
+                $success &= self::_applyFilter( 
+                    $value[$key], $func, $arg, $error[$key], $err_msg, $loop 
+                );
+            }
+            return $success;
+        }
         // -----------------------------------
         // filter/verify value. 
         if( is_callable( $func ) ) {
