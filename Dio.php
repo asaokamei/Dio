@@ -245,8 +245,9 @@ class Dio
     function find( $data, $name, &$value, $type='asis', $filter=array(), &$error=NULL ) {
         $value = self::_find( $data, $name, $filter, $type );
         if( $value === NULL ) {
-            // validate against empty value.
-            $result = self::_validateValue( '', $type, $filter, $error );
+            /** if not found, validate against empty value. */
+            $empty  = '';
+            $result = self::_validateValue( $empty, $type, $filter, $error );
         }
         else {
             $result = self::_validateValue( $value, $type, $filter, $error );
@@ -254,7 +255,18 @@ class Dio
         return $result;
     }
     // +--------------------------------------------------------------- +
-    /** get a validated value in $data array. 
+    /** quick method to get a validated value from $data array. 
+     * 
+     * @param array $data     look for $name in $data array.
+     * @param string $name    name of value in $data array.
+     * @param string $type    specify type of value.
+     * @param array $filter   specify extra filter and options.
+     * @param mix &$error     returns error message if validation fails. 
+     * @return boolean
+     *        returns $value if value exists and validated. 
+     *        returns NULL if value does not exist but validated.
+     *        returns FALSE validation fails. 
+     * 
      *  TODO: Make sure returns NULL if value is not set in $data, 
      *        and returns FALSE if validation fails. 
      */
@@ -267,7 +279,16 @@ class Dio
         return $value;
     }
     // +--------------------------------------------------------------- +
-    /** get a validated value in $_REQUEST array. 
+    /** a quick method to get a validated value from $_REQUEST array. 
+     * @param string $name    name of value in $data array.
+     * @param string $type    specify type of value.
+     * @param array $filter   specify extra filter and options.
+     * @param mix &$error     returns error message if validation fails. 
+     * @param array $data     look for $name in $data. default $_REQUEST
+     * @return boolean
+     *        returns $value if value exists and validated. 
+     *        returns NULL if value does not exist but validated.
+     *        returns FALSE validation fails. 
      */
     function request( $name, $type='asis', $options=array(), &$error=NULL, $data=NULL ) {
         if( $data === NULL ) $data = $_REQUEST;
@@ -319,15 +340,17 @@ class Dio
     // +--------------------------------------------------------------- +
     /** a special method to obtain multiple value from a data. 
      *  not to be used like other filters. 
+     * @param array  $data    finds value in this array. 
+     * @param string $name    look for $data[ $name ].
+     * @param array $option   option for multiple value. 
+     *      $option['suffix']={ $sfx1, $sfx2 }: list of suffix
+     *      $option['connecter']='string': connect like 'Y-m-d'
+     *      $option['separator']='string': ie. {$name}{$sep}{$suffix}
+     *      $option['sformat']  = sprintf's format. overwrites connector.
      *  @return mix value found, FALSE if is not set. 
      */
     function _multiple( $data, $name, $option ) 
     {
-        // get multiple value as specified by $option. 
-        // $option['suffix']={ $sfx1, $sfx2 }: list of suffix
-        // $option['connecter']='string': 
-        // $option['separator']='string': 
-        // $option['sformat']  = sprintf's format. overwrites connector.
         $sep  = '_';
         $con  = '-';
         if( isset( $option['separator'] ) ) {
@@ -403,7 +426,7 @@ class Dio
         return $success;
     }
     // +--------------------------------------------------------------- +
-    /** determine error messages from filters/f_name/option. 
+    /** determine error messages from filters/f_name. 
      */
     function _getErrMsg( $filters, $f_name ) 
     {
@@ -486,6 +509,12 @@ class Dio
     }
     // +--------------------------------------------------------------- +
     /** get real function and argument for given f_name/option.
+     * 
+     * @param string $f_name     filter name in text. 
+     * @param mix $option        option for the filter. 
+     * @param callback &$filter  filter function. must be callable. 
+     * @param mix $arg           argument for filter (i.e. option). 
+     * @return void
      */ 
     function _getFilterFunc( $f_name, $option, &$filter, &$arg ) 
     {
