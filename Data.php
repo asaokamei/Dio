@@ -3,20 +3,24 @@ namespace CenaDta\Dio;
 
 class Data
 {
+    /** save name for post/session/etc.  */
 	var $save_id = 'DioData.save.ID';
-	var $data_source = array(
-		'Data'   => & $this->src_data,
-		'Post'   => & $_POST,
-		'Get'    => & $_GET,
-		'Cookie' => & $_COOKIE,
-	);
+    
+    /** main repository of data */
 	var $data     = array();
+    var $src_data = array();
 	var $err_msg  = array();
 	var $err_num  = 0;
 	var $src_data = array();
 	// +--------------------------------------------------------------- +
 	function __construct( $save_id=NULL ) {
 		if( Util::isValue( $save_id ) ) $this->save_id = $save_id;
+        $this->data_source = array(
+            'Data'   => & $this->src_data,
+            'Post'   => & $_POST,
+            'Get'    => & $_GET,
+            'Cookie' => & $_COOKIE,
+        );
 	}
 	// +--------------------------------------------------------------- +
 	//  push and pop
@@ -33,7 +37,7 @@ class Data
 			else {
 				$this->set( $name, $value );
 			}
-			if( WORDY ) "push found $name in $title. value='{$value}' error=$result.<br />"
+			if( WORDY ) "push found $name in $title. value='{$value}' error=$result.<br />";
 			break;
 		}
 		return $this;
