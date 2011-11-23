@@ -195,7 +195,7 @@ class Dio
     /** create filters array for given type and optional filters.
      * TODO: test this method!!!
      */
-    function __init( $options=NULL ) {
+    function __init( $option=NULL ) {
         $list_static = array(
             'default_err_msgs', 'default_filters', 'default_verifies', 
             'filter_options', 'filters'
