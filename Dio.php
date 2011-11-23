@@ -193,8 +193,20 @@ class Dio
         );
     // +--------------------------------------------------------------- +
     /** create filters array for given type and optional filters.
+     * TODO: test this method!!!
      */
     function __init( $options=NULL ) {
+        $list_static = array(
+            'default_err_msgs', 'default_filters', 'default_verifies', 
+            'filter_options', 'filters'
+        );
+        foreach( $list_static as $static ) {
+            if( isset( $option[ $static ] ) && 
+                is_array( $option[ $static ] ) ) {
+                self::$$static = 
+                    array_merge( self::$$static, $option[ $static ] );
+            }
+        }
     }
     // +--------------------------------------------------------------- +
     /** create filters for given type and extra filter.
@@ -559,28 +571,7 @@ class Dio
         if( WORDY > 5 ) {  echo "_getFilterFunc( $f_name, $option, &$filter, &$arg )<br/>"; };
     }
     // +--------------------------------------------------------------- +
-    //  modify filter settings.
-    // +--------------------------------------------------------------- +
-    /**
-     */
-    function addFilterMethods( $name, $method ) {
-        static::$default_filters[ $name ] = $method;
-    }
-    // +--------------------------------------------------------------- +
-    /**
-     */
-    function addVerifyMethods( $name, $method ) {
-        static::$default_verifies[ $name ] = $method;
-    }
-    // +--------------------------------------------------------------- +
-    /**
-     */
-    function addFilterOptions( $name, $option ) {
-        static::$filter_options[ $name ] = $option;
-    }
-    // +--------------------------------------------------------------- +
 }
-
 
 
 ?>
