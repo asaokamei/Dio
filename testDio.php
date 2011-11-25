@@ -4,7 +4,7 @@ require_once( dirname( __FILE__ ) . "/Validator.php" );
 use CenaDTA\Util\Validator as Validator;
 define( 'WORDY', 0 );
 
-class DioDioTest extends PHPUnit_Framework_TestCase
+class Util_ValidatorTest extends PHPUnit_Framework_TestCase
 {
 	// +----------------------------------------------------------------------+
 	public function setUp()
