@@ -8,15 +8,14 @@ class Util
 	 *  returns TRUE if $var==0 as well.
 	 */
 	static function isValue( $var, $name=FALSE ) {
-		if( is_array( $var ) ) { 
-			if( $name === FALSE ) {
-				return( count( $var ) ); 
-			}
+        if( $name !== FALSE ) {
+            if( !is_array( $var ) ) {
+                return FALSE;
+            }
 			if( isset( $var[ $name ] ) ) {
-				return have_value( $var[ $name ] );
+				return self::isValue( $var[ $name ] );
 			}
-			return FALSE;
-		}
+        }
 		else
 		if( is_object( $var ) ) {
 			return TRUE;
@@ -33,7 +32,7 @@ class Util
 	/** gets a value in $arr[ $name ] without causing E_NOTICE error.
 	 */
 	static function getValue( $arr, $name, $default=FALSE ) {
-		if( isset( $arr[ $name ] ) ) {
+        if( is_array( $arr ) && isset( $arr[ $name ] ) ) {
 			return $arr[ $name ];
 		}
 		return $default;
