@@ -1,7 +1,7 @@
 <?php
 error_reporting( E_ALL );
 require_once( dirname( __FILE__ ) . "/Dio.php" );
-use CenaDTA\Dio\Dio as Dio;
+use CenaDTA\Util\Dio as Dio;
 define( 'WORDY', 0 );
 
 class DioDioTest extends PHPUnit_Framework_TestCase
@@ -64,19 +64,19 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		// convert a text to upper case. 
 		$input  = 'a text';
 		$origin = $input;
-		$return = Dio::_applyFilter( $input, 'CenaDTA\Dio\Filter::string', 'upper', $error );
+		$return = Dio::_applyFilter( $input, 'CenaDTA\Util\Filter::string', 'upper', $error );
 		$this->assertTrue( $return );
 		$this->assertEquals( strtoupper( $origin ), $input );
 		
 		// verify a text is all lower case. 
 		$input  = 'a text';
-		$return = Dio::_applyFilter( $input, 'CenaDTA\Dio\Filter::pattern', '[ a-z]*' );
+		$return = Dio::_applyFilter( $input, 'CenaDTA\Util\Filter::pattern', '[ a-z]*' );
 		$this->assertTrue( $return );
 		
 		// verify a text is not all upper case. and check error message.
 		$input  = 'a text';
 		$err_msg= 'only upper case';
-		$return = Dio::_applyFilter( $input, 'CenaDTA\Dio\Filter::pattern', '[A-Z]*', $error, $err_msg );
+		$return = Dio::_applyFilter( $input, 'CenaDTA\Util\Filter::pattern', '[A-Z]*', $error, $err_msg );
 		$this->assertFalse( $return );
 		$this->assertEquals( $err_msg, $error );
 	}
@@ -188,10 +188,10 @@ class DioDioTest extends PHPUnit_Framework_TestCase
 		$input    = 'same as';
 		$same_str = $input;
 		$diff_str = 'diff-rent';
-		$return = Dio::_applyFilter( $input, 'CenaDTA\Dio\Filter::sameas', $same_str, $error );
+		$return = Dio::_applyFilter( $input, 'CenaDTA\Util\Filter::sameas', $same_str, $error );
 		$this->assertTrue( $return );
 		
-		$return = Dio::_applyFilter( $input, 'CenaDTA\Dio\Filter::sameas', $diff_str, $error );
+		$return = Dio::_applyFilter( $input, 'CenaDTA\Util\Filter::sameas', $diff_str, $error );
 		$this->assertFalse( $return );
 		
 		$return = Dio::validate( $input, 'asis', array(

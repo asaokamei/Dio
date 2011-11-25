@@ -1,5 +1,5 @@
 <?php
-namespace CenaDta\Dio;
+namespace CenaDta\Util;
 require_once( './Util.php' );
 require_once( './Filter.php' );
 
@@ -60,38 +60,38 @@ class Dio
      *
      */
     static $filter_options = array(
-        'trim'        => 'CenaDTA\Dio\Filter::trim',
-        'default'     => 'CenaDTA\Dio\Filter::setDefault',
-        'noNull'      => 'CenaDTA\Dio\Filter::noNull',
-        'encoding'    => 'CenaDTA\Dio\Filter::encoding',
-        'required'    => 'CenaDTA\Dio\Filter::required',
-        'pattern'     => 'CenaDTA\Dio\Filter::pattern',
-        'lower'       => array( 'CenaDTA\Dio\Filter::string',   'lower' ),
-        'upper'       => array( 'CenaDTA\Dio\Filter::string',   'upper' ),
-        'capital'     => array( 'CenaDTA\Dio\Filter::string',   'capital' ),
-        'code'        => array( 'CenaDTA\Dio\Filter::pattern',  '[-_0-9a-zA-Z]*'
+        'trim'        => 'CenaDTA\Util\Filter::trim',
+        'default'     => 'CenaDTA\Util\Filter::setDefault',
+        'noNull'      => 'CenaDTA\Util\Filter::noNull',
+        'encoding'    => 'CenaDTA\Util\Filter::encoding',
+        'required'    => 'CenaDTA\Util\Filter::required',
+        'pattern'     => 'CenaDTA\Util\Filter::pattern',
+        'lower'       => array( 'CenaDTA\Util\Filter::string',   'lower' ),
+        'upper'       => array( 'CenaDTA\Util\Filter::string',   'upper' ),
+        'capital'     => array( 'CenaDTA\Util\Filter::string',   'capital' ),
+        'code'        => array( 'CenaDTA\Util\Filter::pattern',  '[-_0-9a-zA-Z]*'
                               ),
-        'datetype'    => array( 'CenaDTA\Dio\Filter::pattern', 
+        'datetype'    => array( 'CenaDTA\Util\Filter::pattern', 
                                 'ymd'  => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
                                 'ym'   => '[0-9]{4}-[0-9]{2}',
                                 'His'  => '[0-9]{2}:[0-9]{2}:[0-9]{2}',
                                 'Hi'   => '[0-9]{2}:[0-9]{2}',
                                 'dt'   => '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}',
                               ),
-        'number'      => array( 'CenaDTA\Dio\Filter::pattern', '[-0-9]*', 
+        'number'      => array( 'CenaDTA\Util\Filter::pattern', '[-0-9]*', 
                                 'number' => '[0-9]*',
                                 'int'    => '[-]{0,1}[0-9]*',
                                 'float'  => '[-]{0,1}[.0-9]*', 
                               ),
-        'jaKatakana'  => array( 'CenaDTA\Dio\FilterJa::mbJaKana', 'standard' ),
-        'hankaku'     => array( 'CenaDTA\Dio\FilterJa::mbJaKana', 'hankaku' ),
-        'hankana'     => array( 'CenaDTA\Dio\FilterJa::mbJaKana', 'hankana' ),
-        'sameas'      => 'CenaDTA\Dio\Filter::sameas',
-        'string'      => 'CenaDTA\Dio\Filter::string',
-        'sanitize'    => 'CenaDTA\Dio\Filter::sanitize',
-        'checkMail'   => 'CenaDTA\Dio\Filter::checkMail',
-        'mbConvert'   => 'CenaDTA\Dio\FilterJa::mbConvert',
-        'mbCheckKana' => 'CenaDTA\Dio\FilterJa::mbCheckKana',
+        'jaKatakana'  => array( 'CenaDTA\Util\FilterJa::mbJaKana', 'standard' ),
+        'hankaku'     => array( 'CenaDTA\Util\FilterJa::mbJaKana', 'hankaku' ),
+        'hankana'     => array( 'CenaDTA\Util\FilterJa::mbJaKana', 'hankana' ),
+        'sameas'      => 'CenaDTA\Util\Filter::sameas',
+        'string'      => 'CenaDTA\Util\Filter::string',
+        'sanitize'    => 'CenaDTA\Util\Filter::sanitize',
+        'checkMail'   => 'CenaDTA\Util\Filter::checkMail',
+        'mbConvert'   => 'CenaDTA\Util\FilterJa::mbConvert',
+        'mbCheckKana' => 'CenaDTA\Util\FilterJa::mbCheckKana',
     );
     
     // -----------------------------------
