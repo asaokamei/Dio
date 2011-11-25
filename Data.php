@@ -96,7 +96,8 @@ class Data
      */
     function popHtml( $name=FALSE ) {
         $return = $this->pop( $name );
-        array_walk_recursive( $return, 
+        Util::arrayWalk( 
+            $return, 
             function( &$v, $k ) { $v = htmlspecialchars( $v, ENT_QUOTES ); } 
         );
         return $return;

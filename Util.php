@@ -37,6 +37,14 @@ class Util
 		}
 		return $default;
 	}
+	// +--------------------------------------------------------------- +
+    static function arrayWalk( &$value, $func ) {
+        if(is_array( $value ) ) {
+            return array_walk_recursive( $value, $func );
+        }
+        return $func( $value, NULL );
+    }
+	// +--------------------------------------------------------------- +
 }
 
 ?>
