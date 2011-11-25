@@ -48,10 +48,10 @@ class Data
     function find( &$value, $name, $type='asis', $filter=array() ) {
         $found = FALSE;// not found
         $value = NULL; // not found
-        foreach( $this->data_source as $name => $source ) {
+        foreach( $this->data_source as $src_name => $source ) {
             $value = Validator::_find( $source, $name, $filter, $type );
             if( Util::isValue( $value ) ) {
-                $found = $name;
+                $found = $src_name;
                 break;
             }
         }
@@ -116,8 +116,9 @@ class Data
         return FALSE;
     }
     // +--------------------------------------------------------------- +
-    function popError( $name=FALSE ) {
-        return $this->getError( $name );
+    function popError( &$err_msg=NULL ) {
+        $err_msg = $this->getError();
+        return !$this->err_num;
     }
     // +--------------------------------------------------------------- +
     //  setter and getter
