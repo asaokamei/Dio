@@ -332,7 +332,8 @@ class Validator
         else {
             $value = FALSE;
         }
-        if( isset( $filters[ 'samewith' ] ) && $filters[ 'samewith' ] !== FALSE ) {
+        if( $value !== FALSE && 
+            isset( $filters[ 'samewith' ] ) && $filters[ 'samewith' ] !== FALSE ) {
             // compare with other inputs as specified by samewith. 
             $sub_filters = $filters;
             $sub_filters[ 'samewith' ] = FALSE;
