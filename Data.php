@@ -11,7 +11,6 @@ class Data
     var $src_data = array();
 	var $err_msg  = array();
 	var $err_num  = 0;
-	var $src_data = array();
 	// +--------------------------------------------------------------- +
 	function __construct( $save_id=NULL ) {
 		if( Util::isValue( $save_id ) ) $this->save_id = $save_id;
@@ -23,23 +22,32 @@ class Data
         );
 	}
 	// +--------------------------------------------------------------- +
+    /**
+     * 
+     */
+    function find( &$value, $name, $type, $filter=array() ) {
+        $found = FALSE;// not found
+        $value = NULL; // not found
+        foreach( $this->data_source as $name => $source ) {
+            $value = Validator::_find( $source, $name, $filter, $type );
+            if( Util::isValue( $value ) ) {
+                $found = $name;
+                break;
+            }
+        }
+        return $found;
+    }
+	// +--------------------------------------------------------------- +
 	//  push and pop
 	// +--------------------------------------------------------------- +
 	function push( $name, $type='asis', $filter=array() ) {
-		foreach( $this->data_source as $title => $src ) {
-			$result = Dio::validate( $src, $name, $val, $type, $filter, $err );
-			if( $result === NULL ) {
-				continue;
-			}
-			if( $result === FALSE ) {
-				$this->setError( $name, $err, $value );
-			}
-			else {
-				$this->set( $name, $value );
-			}
-			if( WORDY ) "push found $name in $title. value='{$value}' error=$result.<br />";
-			break;
-		}
+        $found = $this->find( $value, $name, $type, $filter );
+        if( Validator::validate( $value, $type, $filter, $error ) ) {
+            $this->set( $name, $value );
+        }
+        else { // fails
+            $this->setError( $name, $error, $value );
+        }
 		return $this;
 	}
 	// +--------------------------------------------------------------- +
@@ -105,6 +113,7 @@ class Data
 		if( $value !== FALSE ) {
 			$this->data[ $name ] = $value;
 		}
+        $this->err_num ++;
 		return $this;
 	}
 	// +--------------------------------------------------------------- +
