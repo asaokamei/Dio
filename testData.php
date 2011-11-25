@@ -37,7 +37,7 @@ class Util_DataIOTest extends PHPUnit_Framework_TestCase
         $this->assertEquals( $date, $value );
 	}
 	// +----------------------------------------------------------------------+
-	public function test_PushMethod()
+	public function test_PushPopMethod()
 	{
         $dio = new CenaDTA\Util\Data();
         // let's find some value. 
@@ -55,19 +55,28 @@ class Util_DataIOTest extends PHPUnit_Framework_TestCase
         $dio->push( $namedate, 'date' );
         $this->assertEquals( $val_test, $dio->pop( $nametest ) );
         $this->assertEquals( $val_date, $dio->pop( $namedate ) );
+        
+        // now popHtml returns safe for xss.
+        $namehtml = 'testhtml';
+        $val_html = '<bold>bold</bold>';
+        $safehtml = htmlspecialchars( $val_html, ENT_QUOTES );
+        $_POST[ $namehtml ] = $val_html;
+        $dio->push( $namehtml );
+        $this->assertEquals( $safehtml, $dio->popHtml( $namehtml ) );
+        
 	}
 	// +----------------------------------------------------------------------+
 	public function test_ErrroMethods()
 	{
         $dio = new CenaDTA\Util\Data();
-        // let's find some value. 
+        // let's find some wrong value. 
         $nametest = 'test';
         $val_test = 'some value';
         $_POST[ $nametest ] = $val_test;
         $dio->push( $nametest, 'date' ); // wrong type of data.
         $success = $dio->popError( $err_msg );
         $this->assertEquals( $val_test, $dio->pop( $nametest ) );
-        $this->assertTrue( $success );
+        $this->assertFalse( $success );
 	}
 	// +----------------------------------------------------------------------+
 }
