@@ -128,9 +128,9 @@ class Filter
         if( !Util::isValue( $val ) ) return FALSE;
         $dbar = '-';
         if( isset( $option[ 'dbar' ] ) ) $dbar = $option[ 'dbar' ];
-        list( $year, $month, $day ) = explode( $dbar, $val );
-        if( Util::isValue( $year ) && Util::isValue( $month ) && Util::isValue( $day ) ) {
-            return @checkdate( $month, $day, $year );
+        $items = explode( $dbar, $val );
+        if( count( $items ) == 3 ) {
+            return @checkdate( $items[1], $items[2], $items[0] );
         }
         return FALSE;
     }
