@@ -13,7 +13,7 @@ class Data
 	var $err_num  = 0;
 	// +--------------------------------------------------------------- +
 	function __construct( $save_id=NULL ) {
-		if( Util::isValue( $save_id ) ) $this->save_id = $save_id;
+		$this->setSaveId( $save_id );
         $this->data_source = array(
             'Data'   => & $this->src_data,
             'Post'   => & $_POST,
@@ -22,6 +22,15 @@ class Data
         );
 	}
 	// +--------------------------------------------------------------- +
+    /**
+     * 
+     */
+    function setSaveId( $save_id ) {
+		if( Util::isValue( $save_id ) ) $this->save_id = $save_id;
+        return $this;
+    }
+
+// +--------------------------------------------------------------- +
     /**
      * 
      */
@@ -130,63 +139,51 @@ class Data
 	// +--------------------------------------------------------------- +
 	//  save and load data
 	// +--------------------------------------------------------------- +
-    function saveSession( $save_id=NULL, $encode=NULL ) {
-		return  $this->saveMethod( "saveSession", $save_id, $encode, $vars );
+    function saveSession() {
+		return  $this->saveMethod( "saveSession" );
     }
 	// +--------------------------------------------------------------- +
-    function & loadSession( $save_id=NULL, $encode=NULL ) {
-		return $this->loadMethod( "loadSession", $save_id, $encode );
+    function & loadSession( $restore=FALSE ) {
+		return $this->loadMethod( "loadSession", $restore );
     }
 	// +--------------------------------------------------------------- +
-    function & restoreSession( $save_id=NULL, $encode=NULL ) {
-		return $this->loadMethod( "loadSession", $save_id, $encode, TRUE );
-    }
-	// +--------------------------------------------------------------- +
-    function clearSession( $save_id=NULL ) {
-        if( WORDY ) echo "clearSession( $save_id, $encode )";
-        if( !have_value( $save_id ) ) $save_id = $this->save_id;
-        if( isset( $_SESSION[ $save_id ] ) ) {
-            unset( $_SESSION[ $save_id ] );
+    function clearSession() {
+        if( isset( $_SESSION[ $this->save_id ] ) ) {
+            unset( $_SESSION[ $this->save_id ] );
         }
     }
 	// +--------------------------------------------------------------- +
-    function savePost( $save_id=NULL, $encode=NULL ) {
-		return  $this->saveMethod( "savePost", $save_id, $encode );
+    function savePost() {
+		return  $this->saveMethod( "savePost" );
     }
 	// +--------------------------------------------------------------- +
-    function loadPost( $save_id=NULL, $encode=NULL ) {
-		return $this->loadMethod( "loadPost", $save_id, $encode );
+    function loadPost( $restore=FALSE ) {
+		return $this->loadMethod( "loadPost", $restore );
     }
 	// +--------------------------------------------------------------- +
-    function restorePost( $save_id=NULL, $encode=NULL ) {
-		return $this->loadMethod( "loadPost", $save_id, $encode, TRUE );
+    function saveCookie() {
+		return  $this->saveMethod( "saveCookie" );
     }
 	// +--------------------------------------------------------------- +
-    function saveCookie( $save_id=NULL, $encode=NULL ) {
-		return  $this->saveMethod( "saveCookie", $save_id, $encode );
+    function loadCookie( $restore=FALSE ) {
+		return $this->loadMethod( "loadCookie", $restore );
     }
 	// +--------------------------------------------------------------- +
-    function loadCookie( $save_id=NULL, $encode=NULL ) {
-		return $this->loadMethod( "loadCookie", $save_id, $encode );
-    }
-	// +--------------------------------------------------------------- +
-    function saveMethod( $method, $save_id=NULL, $encode=NULL ) {
-        if( !Util::isValue( $save_id ) ) $save_id = $this->save_id;
-        $success  = Web_IO::$method( $this->data, $save_id, $encode );
-        if( WORDY > 1 ) wordy_table( $save_var, "saved data by $method ( $save_id, $encode ) into $var_name" );
+    function saveMethod( $method ) {
+        $success  = Web_IO::$method( $this->data, $this->save_id );
+        if( WORDY > 1 ) wordy_table( $save_var, "saved data by $method ( $save_id ) into $var_name" );
 		return $this;
     }
 	// +--------------------------------------------------------------- +
-    function loadMethod( $method, $save_id='', $encode='', $restore=FALSE ) {
-        if( !Util::isValue( $save_id ) ) $save_id = $this->save_id;
-		$data = Web_IO::$method( $save_id, $encode );
+    function loadMethod( $method, $restore=FALSE ) {
+		$data = Web_IO::$method( $this->save_id );
 		if( !empty( $data ) ) {
 	        $this->src_data = array_merge( $this->src_data, $data );
 			if( $restore ) {
 				$this->data = array_merge( $this->data, $data );
 			}
         }
-        if( WORDY > 1 ) wordy_table( $this->src_data, "loading data by $method( $save_id, $encode )" );
+        if( WORDY > 1 ) wordy_table( $this->src_data, "loading data by $method( $this->save_id )" );
 		return $this;
     }
 	// +--------------------------------------------------------------- +
