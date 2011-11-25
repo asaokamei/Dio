@@ -1,5 +1,5 @@
 <?php
-namespace CenaDta\Dio;
+namespace CenaDta\Util;
 
 class Data
 {
