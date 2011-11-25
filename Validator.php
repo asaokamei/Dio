@@ -402,7 +402,7 @@ class Validator
      *          TRUE if validation and all are successful.
      *          FALSE if validation fails. 
      */
-    function _validateValue( &$value, $filters=array(), &$error ) 
+    function _validateValue( &$value, $filters=array(), &$error=NULL ) 
     {
         // -----------------------------------
         // build filter list. 
