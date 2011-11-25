@@ -66,6 +66,7 @@ class Validator
         'encoding'    => 'CenaDTA\Util\Filter::encoding',
         'required'    => 'CenaDTA\Util\Filter::required',
         'pattern'     => 'CenaDTA\Util\Filter::pattern',
+        'checkdate'   => 'CenaDTA\Util\Filter::checkDate',
         'lower'       => array( 'CenaDTA\Util\Filter::string',   'lower' ),
         'upper'       => array( 'CenaDTA\Util\Filter::string',   'upper' ),
         'capital'     => array( 'CenaDTA\Util\Filter::string',   'capital' ),
