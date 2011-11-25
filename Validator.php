@@ -3,7 +3,7 @@ namespace CenaDta\Util;
 require_once( './Util.php' );
 require_once( './Filter.php' );
 
-class Dio
+class Validator
 {
     // -----------------------------------
     const  DEFAULT_EMPTY_VALUE = '';
@@ -301,7 +301,7 @@ class Dio
      */
     function request( $name, $type='asis', $options=array(), &$error=NULL, $data=NULL ) {
         if( $data === NULL ) $data = $_REQUEST;
-        return Dio::get( $data, $name, $type, $options, $error );
+        return self::get( $data, $name, $type, $options, $error );
     }
     // +--------------------------------------------------------------- +
     /** find a value $name in $data array. 
@@ -515,7 +515,7 @@ class Dio
                 $err_msg = "error@{$f_name}";
             }
             if( WORDY ) 
-                echo "<font color=red>Dio::_applyFilter failed on '$value', " . 
+                echo "<font color=red>Validator::_applyFilter failed on '$value', " . 
                      "filter( $func, $arg ) => $error</font><br/>\n";
             $success = FALSE;
         }
