@@ -1,10 +1,11 @@
 <?php
+namespace CenaDTA\Util;
 
-class Web 
+class WebIO
 {
-	const encode_none         = 'none'; 
-	const encode_base64       = 'base64'; 
-	const encode_crypt        = 'crypt';
+	const ENCODE_NONE         = 'none'; 
+	const ENCODE_BASE64       = 'base64'; 
+	const ENCODE_CRYPT        = 'crypt';
     public static $save_id    = 'Dio_saveID';  // 
 	public static $encode_id  = 'Dio_Encode_Type_'; 
 	public static $encode_std = 'base64';
@@ -33,7 +34,7 @@ class Web
     {
         if( WORDY > 4 ) echo "<i>Web::savePost( $data, $save_id, $encode )</i>...<br>\n";
         if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-		if( !have_value( $encode  ) ) { $encode  = self::encode_crypt; }
+		if( !have_value( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
         
         $val   = Web_IO::encodeData( $data, $encode );
         $htag  = "<input type='hidden' name='{$save_id}' value='{$val}'>";
@@ -100,7 +101,7 @@ class Web
     {
         if( WORDY > 4 ) echo "<i>Web_IO::saveCookie( $data, $save_id, $encode, $save_time )</i>...<br>\n";
         if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-		if( !have_value( $encode  ) ) { $encode  = self::encode_crypt; }
+		if( !have_value( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
         
         $cook_value = Web_IO::encodeData( $data, $encode );
         if( !$save_time ) {
@@ -147,15 +148,15 @@ class Web
         if( WORDY > 4 ) echo "<i>Web_IO::encodeData( $data, $encode )</i>...<br>\n";
         // encoding $data; $data can be an array
         // returns a seriarized string data.
-		if( !have_value( $encode  ) ) { $encode  = self::$encode_std; }
+		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
         $se_data = serialize( $data );
         
         switch( $encode )
         {
-            case self::encode_base64:
+            case self::ENCODE_BASE64:
                 $en_data = base64_encode( $se_data );
                 break;
-            case self::encode_crypt:
+            case self::ENCODE_CRYPT:
 				if( !function_exists( 'mcrypt_encrypt' ) ) {
 					throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
 				}
@@ -172,7 +173,7 @@ class Web
 								)
 					) ) ); 
 				break;
-            case self::encode_none:
+            case self::ENCODE_NONE:
             default:
                 $en_data = $se_data;
                 break;
@@ -190,10 +191,10 @@ class Web
         
         switch( $encode )
         {
-            case self::encode_base64:
+            case self::ENCODE_BASE64:
                 $de_data = base64_decode( $data );
                 break;
-            case self::encode_crypt:
+            case self::ENCODE_CRYPT:
 				if( !function_exists( 'mcrypt_decrypt' ) ) {
 					throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
 				}
@@ -210,7 +211,7 @@ class Web
 							)
 					) ); 
 				break;
-            case self::encode_none:
+            case self::ENCODE_NONE:
             default:
                 $de_data = $data;
                 break;
