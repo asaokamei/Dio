@@ -30,15 +30,18 @@ class WebIO
 		return self::$crypt_pswd;
 	}
     // +--------------------------------------------------------------- +
-    static function savePost( $data, $save_id='', $encode=NULL )
+    static function savePost( $data, $save_id=NULL, $encode=NULL )
     {
         if( WORDY > 4 ) echo "<i>Web::savePost( $data, $save_id, $encode )</i>...<br>\n";
-        if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-		if( !have_value( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
+        if( !Util::isValue( $save_id ) ) { 
+            $save_id = self::$save_id; 
+        }
+		if( !Util::isValue( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
         
-        $val   = Web_IO::encodeData( $data, $encode );
+        $val   = self::encodeData( $data, $encode );
+        $enc_id= self::$encode_id;
         $htag  = "<input type='hidden' name='{$save_id}' value='{$val}'>";
-        $htag .= "<input type='hidden' name='{self::$encode_id}{$save_id}' value='{$encode}'>\n";
+        $htag .= "<input type='hidden' name='{$enc_id}{$save_id}' value='{$encode}'>\n";
         
         return $htag;
     }
@@ -46,16 +49,16 @@ class WebIO
     static function loadPost( $save_id='', $encode=NULL )
     {
         if( WORDY > 4 ) echo "<i>Web_IO::loadPost( $save_id, $encode )</i>...<br>\n";
-        if( !have_value( $save_id ) ) { 
+        if( !Util::isValue( $save_id ) ) { 
 			$save_id = self::$save_id; 
 		}
-        if( !$encode && have_value( $_POST[ self::$encode_id . $save_id ] ) ) {
+        if( !$encode && Util::isValue( $_POST[ self::$encode_id . $save_id ] ) ) {
             $encode = $_POST[ self::$encode_id . $save_id ];
         }
         
         $data = array();
-        if( have_value( $_POST[ $save_id ] ) ) {
-            $data = Web_IO::decodeData( $_POST[ $save_id ], $encode );
+        if( Util::isValue( $_POST[ $save_id ] ) ) {
+            $data = self::decodeData( $_POST[ $save_id ], $encode );
         }
         return $data;
     }
@@ -63,13 +66,13 @@ class WebIO
     static function saveSession( $data, $save_id='',$encode=NULL )
     {
         if( WORDY > 4 ) echo "<i>Web_IO::saveSession( $data, $save_id, $encode )</i>...<br>\n";
-        if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-		if( !have_value( $encode  ) ) { $encode  = self::$encode_std; }
+        if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
+		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
         
         if( empty( $_SESSION ) ) {
             session_start();
         }
-        $_SESSION[ $save_id ] = Web_IO::encodeData( $data, $encode );
+        $_SESSION[ $save_id ] = self::encodeData( $data, $encode );
         
         return TRUE;
     }
@@ -77,15 +80,15 @@ class WebIO
     static function loadSession( $save_id='',$encode=NULL )
     {
         if( WORDY > 4 ) echo "<i>Web_IO::loadSession( $save_id, $encode )</i>...<br>\n";
-        if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-		if( !have_value( $encode  ) ) { $encode  = self::$encode_std; }
+        if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
+		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
         
         $data = NULL;
         if( empty( $_SESSION ) ) {
             session_start();
         }
         if( !empty( $_SESSION[ $save_id ] ) ) {
-            $data = Web_IO::decodeData( $_SESSION[ $save_id ], $encode );
+            $data = self::decodeData( $_SESSION[ $save_id ], $encode );
         }
         return $data;
     }
@@ -100,10 +103,10 @@ class WebIO
     static function saveCookie( $data, $save_id='', $encode=NULL, $save_time='' )
     {
         if( WORDY > 4 ) echo "<i>Web_IO::saveCookie( $data, $save_id, $encode, $save_time )</i>...<br>\n";
-        if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-		if( !have_value( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
+        if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
+		if( !Util::isValue( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
         
-        $cook_value = Web_IO::encodeData( $data, $encode );
+        $cook_value = self::encodeData( $data, $encode );
         if( !$save_time ) {
             $success = setcookie( $save_id, $cook_value );
         }
@@ -131,14 +134,14 @@ class WebIO
     static function loadCookie( $save_id='',$encode=NULL )
     {
         if( WORDY > 4 ) echo "<i>Web_IO::loadCookie( $save_id, $encode )</i>...<br>\n";
-        if( !have_value( $save_id ) ) { $save_id = self::$save_id; }
-        if( !$encode && have_value( $_COOKIE[ self::$encode_id . $save_id ] ) ) {
+        if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
+        if( !$encode && Util::isValue( $_COOKIE[ self::$encode_id . $save_id ] ) ) {
             $encode = $_COOKIE[ self::$encode_id . $save_id ];
         }
         
         $data = array();
-        if( @have_value( $_COOKIE[ $save_id ] ) ) {
-            $data = Web_IO::decodeData( $_COOKIE[ $save_id ], $encode );
+        if( @Util::isValue( $_COOKIE[ $save_id ] ) ) {
+            $data = self::decodeData( $_COOKIE[ $save_id ], $encode );
         }
         return $data;
     }
