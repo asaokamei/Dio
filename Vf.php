@@ -51,6 +51,11 @@ class Vf
         return $success;
     }
     // +--------------------------------------------------------------- +
+    static function isError( &$error=NULL ) {
+        $error = self::$error;
+        return !self::$err_num;
+    }
+    // +--------------------------------------------------------------- +
 }
 
 ?>
