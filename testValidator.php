@@ -11,6 +11,13 @@ class Util_ValidatorTest extends PHPUnit_Framework_TestCase
 	{
 	}
 	// +----------------------------------------------------------------------+
+	public function test_defaultType()
+	{
+        // it should have the default value. 
+        $return = Validator::request( 'noinput', 'asis' );
+        $this->assertEquals( '', $return );
+	}
+	// +----------------------------------------------------------------------+
 	public function test_default()
 	{
         $value = '';
