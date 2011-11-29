@@ -11,6 +11,40 @@ class Util_ValidatorTest extends PHPUnit_Framework_TestCase
 	{
 	}
 	// +----------------------------------------------------------------------+
+	public function test_default()
+	{
+        $value = '';
+        $default = 'def';
+        $filter = array( 'default' => $default );
+        
+        // it should have the default value. 
+        $return = Validator::validate( $value, 'asis', $filter, $error );
+        $this->assertEquals( $default, $value );
+        $this->assertTrue( $return );
+        
+        // should have default value, BUT validation must fail!
+        $return = Validator::validate( $value, 'date', $filter, $error );
+        $this->assertEquals( $default, $value );
+        $this->assertFalse( $return );
+        
+        // let's see if setting default to NULL works. 
+        $value = '';
+        $default = NULL;
+        $filter = array( 'default' => $default );
+        
+        // it should have the default value. 
+        $return = Validator::validate( $value, 'asis', $filter, $error );
+        $this->assertEquals( $default, $value );
+        $this->assertTrue( is_null( $value ) );
+        $this->assertTrue( $return );
+        
+        // should have default value, BUT validation must fail!
+        $return = Validator::validate( $value, 'date', $filter, $error );
+        $this->assertEquals( $default, $value );
+        $this->assertTrue( is_null( $value ) );
+        $this->assertFalse( $return );
+	}
+	// +----------------------------------------------------------------------+
 	public function test_emptyNull()
 	{
         $val = 'valval';
@@ -23,8 +57,9 @@ class Util_ValidatorTest extends PHPUnit_Framework_TestCase
         $filters = array();
         
         // test empty value (really nothing). 
+        // if not found, should return NULL. 
         $return = Validator::_find( $data, 'test', $filters, 'asis' );
-        $this->assertFalse( $return );
+        $this->assertTrue( is_null( $return ) );
         
         // test empty string ('').
         $return = Validator::_find( $data, 'empty', $filters, 'asis' );
@@ -42,9 +77,31 @@ class Util_ValidatorTest extends PHPUnit_Framework_TestCase
         $return = Validator::_find( $data, 'value', $filters, 'asis' );
         $this->assertEquals( $val, $return );
         
+        // test on find method
+        
+        // if not found, should return NULL. (if not required...)
+        $return = Validator::find( $data, 'test', $value, 'asis', $filters, $error );
+        $this->assertTrue( $return );
+        $this->assertTrue( is_null( $value ) );
+        
+        $return = Validator::find( $data, 'empty', $value, 'asis', $filters, $error );
+        $this->assertTrue( $return );
+        $this->assertEquals( '', $value );
+        
+        $return = Validator::find( $data, 'false', $value, 'asis', $filters, $error );
+        $this->assertTrue( $return );
+        $this->assertEquals( '', $value );
+        
+        $return = Validator::find( $data, 'null', $value, 'asis', $filters, $error );
+        $this->assertTrue( $return );
+        $this->assertEquals( '', $value );
+        
+        $return = Validator::find( $data, 'value', $value, 'asis', $filters, $error );
+        $this->assertTrue( $return );
+        $this->assertEquals( $val, $value );
+        
         // test on request method
         
-        // no test
         $return = Validator::request( 'test', 'asis', $filters, $error, $data );
         $this->assertTrue( is_null( $return ) );
         
@@ -83,10 +140,10 @@ class Util_ValidatorTest extends PHPUnit_Framework_TestCase
         $found = Validator::_find( $data, $name );
 		$this->assertEquals( $value, $found );
         
-        // look for non-existent value, should return FALSE.
+        // look for non-existent value, should return NULL.
         $found = Validator::_find( $data, 'bad_name' );
 		$this->assertNotEquals( $value, $found );
-		$this->assertFalse( $found );
+		$this->assertTrue( is_null( $found ) );
         
         // look for non-string value (FALSE), should return ''. 
         $name = 'test';

@@ -300,9 +300,20 @@ class Validator
      *        returns NULL if value does not exist but validated.
      *        returns FALSE validation fails. 
      */
-    function request( $name, $type='asis', $options=array(), &$error=NULL, $data=NULL ) {
+    function request( $name, $type='asis', $filter=array(), &$error=NULL, $data=NULL ) {
         if( $data === NULL ) $data = $_REQUEST;
-        return self::get( $data, $name, $type, $options, $error );
+        $success = self::find( $data, $name, &$value, $type, $filter, $error );
+        if( !$success ) {
+            $found = FALSE;
+        }
+        else
+        if( is_null( $value ) ) {
+            $found = NULL;
+        }
+        else {
+            $found = $value;
+        }
+        return $found;
     }
     // +--------------------------------------------------------------- +
     /** find a value $name in $data array. 
@@ -312,7 +323,7 @@ class Validator
      * @param string $name    look for $data[ $name ].
      * @param array $filters  filter to use (multiple and same* filters)
      * @return mix 
-     *            returns FALSE if value are not found, 
+     *            returns NULL if value are not found, 
      *            returns DEFAULT_EMPTY_VALUE if value is not a string
      *            returns the found value
      */
@@ -331,9 +342,9 @@ class Validator
             $value = self::_multiple( $data, $name, $filters[ 'multiple' ] );
         }
         else {
-            $value = FALSE;
+            $value = NULL;
         }
-        if( $value !== FALSE && 
+        if( $value !== NULL && 
             isset( $filters[ 'samewith' ] ) && $filters[ 'samewith' ] !== FALSE ) {
             // compare with other inputs as specified by samewith. 
             $sub_filters = $filters;
