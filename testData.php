@@ -63,7 +63,6 @@ class Util_DataIOTest extends PHPUnit_Framework_TestCase
         $_POST[ $namehtml ] = $val_html;
         $dio->push( $namehtml );
         $this->assertEquals( $safehtml, $dio->popHtml( $namehtml ) );
-        
 	}
 	// +----------------------------------------------------------------------+
 	public function test_ErrroMethods()

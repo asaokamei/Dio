@@ -10,15 +10,64 @@ class Util_ValidatorTest extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 	}
+	// +----------------------------------------------------------------------+
+	public function test_emptyNull()
+	{
+        $val = 'valval';
+        $data = array( 
+            'empty' => '', 
+            'false' => FALSE, 
+            'null' => NULL, 
+            'value'=> $val 
+            );
+        $filters = array();
+        
+        // test empty value (really nothing). 
+        $return = Validator::_find( $data, 'test', $filters, 'asis' );
+        $this->assertFalse( $return );
+        
+        // test empty string ('').
+        $return = Validator::_find( $data, 'empty', $filters, 'asis' );
+        $this->assertEquals( Validator::DEFAULT_EMPTY_VALUE, $return );
+        
+        // test FALSE.
+        $return = Validator::_find( $data, 'false', $filters, 'asis' );
+        $this->assertEquals( Validator::DEFAULT_EMPTY_VALUE, $return );
+        
+        // test null.
+        $return = Validator::_find( $data, 'null', $filters, 'asis' );
+        $this->assertEquals( Validator::DEFAULT_EMPTY_VALUE, $return );
+        
+        // test value
+        $return = Validator::_find( $data, 'value', $filters, 'asis' );
+        $this->assertEquals( $val, $return );
+        
+        // test on request method
+        
+        // no test
+        $return = Validator::request( 'test', 'asis', $filters, $error, $data );
+        $this->assertTrue( is_null( $return ) );
+        
+        // empty
+        $return = Validator::request( 'empty', 'asis', $filters, $error, $data );
+        $this->assertEquals( Validator::DEFAULT_EMPTY_VALUE, $return );
+        
+        // FALSE
+        $return = Validator::request( 'false', 'asis', $filters, $error, $data );
+        $this->assertEquals( Validator::DEFAULT_EMPTY_VALUE, $return );
+        
+        // null
+        $return = Validator::request( 'null', 'asis', $filters, $error, $data );
+        $this->assertEquals( Validator::DEFAULT_EMPTY_VALUE, $return );
+        
+        // empty
+        $return = Validator::request( 'value', 'asis', $filters, $error, $data );
+        $this->assertEquals( $val, $return );
+        
+	}
+	// +----------------------------------------------------------------------+
 	public function test_min()
 	{
-        $input  = ' a test ';
-		$origin = $input;
-		$return = Validator::validate( $input, 'text', array(), $error );
-		$this->assertTrue( $return );
-		$this->assertNotEquals( $origin, $input );
-		$this->assertEquals( trim( $origin ), $input );
-        //$this->assertTrue( phpversion() );
 	}
 	// +----------------------------------------------------------------------+
 	// test suites for htmlForm.
