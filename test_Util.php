@@ -20,6 +20,37 @@ class Util_UtilTest extends PHPUnit_Framework_TestCase
 	{
 	}
 	// +----------------------------------------------------------------------+
+	public function test_getArgs()
+	{
+        $type = 'asis';
+        $req  = TRUE;
+        $pat  = '[0-9]*';
+        $def  = 'something';
+        $more = 'more';
+        $arg = array( $type, $req, $pat, $def );
+        $map = array( 'type', 'require', 'pattern', 'default' );
+        $result = Util::getArgs( $arg, $map );
+        $this->assertTrue( !empty( $result ) );
+        $this->assertEquals( $type, $result[ 'type' ] );
+        $this->assertEquals( $req,  $result[ 'require' ] );
+        $this->assertEquals( $pat,  $result[ 'pattern' ] );
+        $this->assertEquals( $def,  $result[ 'default' ] );
+        
+        // add an array to argument
+        $arg[] = array(  'more' => $more );
+        $result = Util::getArgs( $arg, $map );
+        $this->assertEquals( $more,  $result[ 'more' ] );
+        
+        // no default map. this should create result w/o default.
+        $map = array( 'type', 'require', 'pattern' );
+        $result = Util::getArgs( $arg, $map );
+        $this->assertEquals( $type, $result[ 'type' ] );
+        $this->assertEquals( $req,  $result[ 'require' ] );
+        $this->assertEquals( $pat,  $result[ 'pattern' ] );
+        $this->assertEquals( $more, $result[ 'more' ] );
+        $this->assertTrue( !isset( $result[ 'default' ] ) );
+    }
+	// +----------------------------------------------------------------------+
 	public function test_getValue()
 	{
         $value   = 'value';
