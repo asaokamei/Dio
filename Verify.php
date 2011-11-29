@@ -6,7 +6,7 @@ namespace CenaDta\Util;
  * and open the template in the editor.
  */
 
-class Vf
+class Verify
 {
     /**
      * source to search data for. 
@@ -29,9 +29,9 @@ class Vf
      */
     static $err_num;
     // +--------------------------------------------------------------- +
-    static function source( $source ) {
+    static function source( &$source ) {
         if( !is_null( $source ) && is_array( $source ) ) {
-            self::$source = $source;
+            self::$source = &$source;
         }
     }
     // +--------------------------------------------------------------- +
@@ -49,6 +49,16 @@ class Vf
         }
         self::$data[ $name ] = $value;
         return $success;
+    }
+    // +--------------------------------------------------------------- +
+    static function check( $name, $type ) {
+        $args = func_get_args();
+        $name = $args[0];
+        $type = $args[1];
+        
+        $args = array_slice( $args, 2 );
+        $filter = Util::getArgs( $args, array( 'required', 'pattern', 'default' ) );
+        self::push( $name, $type, $filter );
     }
     // +--------------------------------------------------------------- +
     static function isError( &$error=NULL ) {
