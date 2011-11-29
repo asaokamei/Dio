@@ -20,6 +20,23 @@ class Util_UtilTest extends PHPUnit_Framework_TestCase
 	{
 	}
 	// +----------------------------------------------------------------------+
+	public function test_getValue()
+	{
+        $value   = 'value';
+        $default = 'default';
+        $data = array( 'test' => $value );
+        
+        // test for array
+        $this->assertEquals( $value, Util::getValue( $data, 'test' ) );
+        $this->assertFalse(  Util::getValue( $data, 'none' ) );
+        $this->assertEquals( $default, Util::getValue( $data, 'none', $default ) );
+        $this->assertFalse(  Util::getValue( $data['test'], 'none' ) );
+        
+        // try something not an array.
+        $this->assertFalse(  Util::getValue( $value, 'none' ) );
+        $this->assertEquals( $default, Util::getValue( $value, 'none', $default ) );
+	}
+	// +----------------------------------------------------------------------+
 	public function test_isValue()
 	{
         // test just simple value. 
