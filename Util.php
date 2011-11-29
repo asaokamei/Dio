@@ -15,6 +15,7 @@ class Util
 			if( isset( $var[ $name ] ) ) {
 				return self::isValue( $var[ $name ] );
 			}
+            return FALSE;
         }
 		else
 		if( is_object( $var ) ) {
