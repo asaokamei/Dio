@@ -257,10 +257,10 @@ class Validator
         if( $value === NULL ) {
             /** if not found, validate against empty value. */
             $empty  = '';
-            $result = self::_validateValue( $empty, $type, $filter, $error );
+            $result = self::_validateValue( $empty, $filter, $error );
         }
         else {
-            $result = self::_validateValue( $value, $type, $filter, $error );
+            $result = self::_validateValue( $value, $filter, $error );
         }
         return $result;
     }
