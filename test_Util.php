@@ -1,17 +1,11 @@
 <?php
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 use CenaDTA\Util\Util as Util;
-// in this test, error_reporting is set to off to test void staff.
 error_reporting( E_ALL );
 require_once( dirname( __FILE__ ) . "/Util.php" );
 define( 'WORDY', 0 );
 
 /**
- * PHPUnit test for Web Input/Output object.
+ * PHPUnit test for CenaDTA\Util\Util class.
  */
 class Util_UtilTest extends PHPUnit_Framework_TestCase
 {

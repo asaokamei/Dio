@@ -1,6 +1,9 @@
 <?php
 namespace CenaDTA\Util;
-
+/**
+ * Util class
+ * utility class for Cena-DTA project. 
+ */
 class Util
 {
     // +--------------------------------------------------------------- +
@@ -33,7 +36,7 @@ class Util
     /** gets a value in $arr[ $name ] without causing E_NOTICE error.
      */
     static function getValue( $arr, $name, $default=FALSE ) {
-        if( is_array( $arr ) && isset( $arr[ $name ] ) ) {
+        if( is_array( $arr ) && array_key_exists( $name, $arr ) ) {
             return $arr[ $name ];
         }
         return $default;
