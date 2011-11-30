@@ -39,23 +39,23 @@ class Util_VerifyTest extends PHPUnit_Framework_TestCase
         Verify::source( $data );
         
         // push $name into Verify.
-        $found = Verify::push( $name );
+        $found = Verify::verify( $name );
 		$this->assertEquals( $value, $found );
-        $popped = Verify::pop( $name );
+        $popped = Verify::verify( $name );
 		$this->assertEquals( $value, $popped );
         
         // push non-existent data. 
         $bad_name = 'not_exist';
-        $found = Verify::push( $bad_name );
+        $found = Verify::verify( $bad_name );
 		$this->assertTrue( is_null( $found ) );
-        $popped = Verify::pop( $bad_name );
+        $popped = Verify::verify( $bad_name );
 		$this->assertTrue( is_null( $popped ) );
         
         // push non-existent data and create an error.
         $bad_name = 'not_exist';
-        $found = Verify::push( $bad_name, 'asis', array( 'required'=>TRUE ) );
+        $found = Verify::verify( $bad_name, 'asis', array( 'required'=>TRUE ) );
 		$this->assertFalse( $found );
-        $popped = Verify::pop( $bad_name );
+        $popped = Verify::verify( $bad_name );
 		$this->assertTrue( is_null( $popped ) );
     }
 }

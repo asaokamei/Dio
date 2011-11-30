@@ -47,7 +47,7 @@ class Verify
         return self::$data;
     }
     // +--------------------------------------------------------------- +
-    static function push( $name, $type='asis', $filter=array() ) {
+    static function verify( $name, $type='asis', $filter=array() ) {
         $error   = NULL;
         $value   = NULL;
         $success = Validator::find( self::$source, $name, $value, $type, $filter, $error );
@@ -67,14 +67,23 @@ class Verify
         return FALSE;
     }
     // +--------------------------------------------------------------- +
-    static function check( $name, $type ) {
+    static function push( $name, $type ) {
         $args = func_get_args();
         $name = $args[0];
         $type = $args[1];
         
         $args = array_slice( $args, 2 );
         $filter = Util::getArgs( $args, array( 'required', 'pattern', 'default' ) );
-        self::push( $name, $type, $filter );
+        self::verify( $name, $type, $filter );
+    }
+    // +--------------------------------------------------------------- +
+    static function check( $list ) {
+        if( is_array( $list ) && !empty( $list ) ) {
+            foreach( $list as $name => $item ) {
+                self::push( $name, $item[0], $item[1] );
+            }
+        }
+        return isError();
     }
     // +--------------------------------------------------------------- +
     static function isError( &$error=NULL ) {
