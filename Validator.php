@@ -331,6 +331,7 @@ class Validator
         if( $type !== FALSE ) {
             $filters = self::_getFilter( $filters, $type );
         }
+        $value = NULL;
         if( isset( $data[ $name ] ) ) {
             // simplest case. 
             $value = $data[ $name ];
@@ -341,14 +342,12 @@ class Validator
             // case to read such as Y-m-d in three different values. 
             $value = self::_multiple( $data, $name, $filters[ 'multiple' ] );
         }
-        else {
-            $value = NULL;
-        }
         if( $value !== NULL && 
             isset( $filters[ 'samewith' ] ) && $filters[ 'samewith' ] !== FALSE ) {
             // compare with other inputs as specified by samewith. 
             $sub_filters = $filters;
             $sub_filters[ 'samewith' ] = FALSE;
+            $sub_name  = $filters[ 'samewith' ];
             $sub_value = self::_find( $data, $sub_name, $sub_filters );
             if( $sub_value ) {
                 $filters[ 'sameas' ] = $sub_value;
@@ -456,6 +455,7 @@ class Validator
         // build $messages: 
         //   0       => global err_msg, 
         //  'f_name' => filter specific err_msg
+        $err_msg = 'error';
         if( isset( $filters[ 'err_msg' ] ) && 
             is_array( $filters[ 'err_msg' ] ) && 
             isset( $filters[ 'err_msg' ][ $f_name ] ) ) {
@@ -525,7 +525,7 @@ class Validator
                 $error = $err_msg;
             }
             else { // use generic error message. 
-                $err_msg = "error@{$f_name}";
+                $err_msg = "error";
             }
             if( WORDY ) 
                 echo "<font color=red>Validator::_applyFilter failed on '$value', " . 
@@ -545,7 +545,7 @@ class Validator
      * @param string $f_name     filter name in text. 
      * @param mix $option        option for the filter. 
      * @param callback &$filter  filter function. must be callable. 
-     * @param mix $arg           argument for filter (i.e. option). 
+     * @param mix &$arg          argument for filter (i.e. option). 
      * @return void
      */ 
     function _getFilterFunc( $f_name, $option, &$filter, &$arg ) 
