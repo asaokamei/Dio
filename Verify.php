@@ -1,10 +1,11 @@
 <?php
 namespace CenaDta\Util;
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Verify.php 
+ * a static class to verify/obtain data from a source. 
+ * a wrapper class for Validator class. 
  */
+require_once( dirname( __FILE__ ) . "/Validator.php" );
 
 class Verify
 {
@@ -12,27 +13,34 @@ class Verify
      * source to search data for. 
      * @var array
      */
-    static $source;
+    static $source = array();
     /**
      * found data
      * @var array
      */
-    static $data;
+    static $data = array();
     /**
      * error message
      * @var array
      */
-    static $error;
+    static $error = array();
     /**
      * number of errors
      * @var integer
      */
-    static $err_num;
+    static $err_num = 0;
     // +--------------------------------------------------------------- +
     static function source( &$source ) {
         if( !is_null( $source ) && is_array( $source ) ) {
             self::$source = &$source;
         }
+    }
+    // +--------------------------------------------------------------- +
+    static function _init() {
+        self::$source  = array();
+        self::$data    = array();
+        self::$error   = array();
+        self::$err_num = 0;
     }
     // +--------------------------------------------------------------- +
     static function data( $data=NULL ) {
@@ -46,9 +54,17 @@ class Verify
         if( !$success ) {
             self::$err_num++;
             self::$error[ $name ] = $error;
+            return FALSE;
         }
         self::$data[ $name ] = $value;
-        return $success;
+        return $value;
+    }
+    // +--------------------------------------------------------------- +
+    static function pop( $name ) {
+        if( array_key_exists( $name, self::$data ) ) {
+            return self::$data[ $name ];
+        }
+        return FALSE;
     }
     // +--------------------------------------------------------------- +
     static function check( $name, $type ) {
