@@ -3,33 +3,33 @@ namespace CenaDTA\Util;
 
 class WebIO
 {
-	const ENCODE_NONE         = 'none'; 
-	const ENCODE_BASE64       = 'base64'; 
-	const ENCODE_CRYPT        = 'crypt';
+    const ENCODE_NONE         = 'none'; 
+    const ENCODE_BASE64       = 'base64'; 
+    const ENCODE_CRYPT        = 'crypt';
     const ENCODE_JSON         = 'json';
     public static $save_id    = 'Dio_saveID';  // 
-	public static $encode_id  = 'Dio_Encode_Type_'; 
-	public static $encode_std = 'base64';
+    public static $encode_id  = 'Dio_Encode_Type_'; 
+    public static $encode_std = 'base64';
     public static $crypt_pswd = "web_secret_pswd";   // 
-	// +--------------------------------------------------------------- +
+    // +--------------------------------------------------------------- +
     static function Web( $save_id=FALSE, $passwd=FALSE ) {
-		self::saveId( $save_id );
-		self::passWord( $save_id );
+        self::saveId( $save_id );
+        self::passWord( $save_id );
     }
-	// +--------------------------------------------------------------- +
+    // +--------------------------------------------------------------- +
     static function saveId( $save_id=FALSE ) {
-		if( $save_id !== FALSE ) {
-			self::$save_id = $save_id; 
-		}
-		return self::$save_id;
-	}
-	// +--------------------------------------------------------------- +
+        if( $save_id !== FALSE ) {
+            self::$save_id = $save_id; 
+        }
+        return self::$save_id;
+    }
+    // +--------------------------------------------------------------- +
     static function passWord( $passwd=FALSE ) {
-		if( $passwd !== FALSE ) {
-			self::$crypt_pswd = $passwd; 
-		}
-		return self::$crypt_pswd;
-	}
+        if( $passwd !== FALSE ) {
+            self::$crypt_pswd = $passwd; 
+        }
+        return self::$crypt_pswd;
+    }
     // +--------------------------------------------------------------- +
     static function saveStorage( $data, $save_id=NULL )
     {
@@ -51,8 +51,8 @@ class WebIO
     {
         if( WORDY > 4 ) echo "<i>Web_IO::loadStorage( $save_id, $encode )</i>...<br>\n";
         if( !Util::isValue( $save_id ) ) { 
-			$save_id = self::$save_id; 
-		}
+            $save_id = self::$save_id; 
+        }
         $enc_id= self::$encode_id;
         $encode= self::ENCODE_JSON;
         $js    = 
@@ -73,13 +73,13 @@ class WebIO
         if( !Util::isValue( $save_id ) ) { 
             $save_id = self::$save_id; 
         }
-		if( !Util::isValue( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
-        
+        if( !Util::isValue( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
+
         $val   = self::encodeData( $data, $encode );
         $enc_id= self::$encode_id;
         $htag  = "<input type='hidden' name='{$save_id}' value='{$val}'>";
         $htag .= "<input type='hidden' name='{$enc_id}{$save_id}' value='{$encode}'>\n";
-        
+
         return $htag;
     }
     // +--------------------------------------------------------------- +
@@ -87,12 +87,12 @@ class WebIO
     {
         if( WORDY > 4 ) echo "<i>Web_IO::loadPost( $save_id, $encode )</i>...<br>\n";
         if( !Util::isValue( $save_id ) ) { 
-			$save_id = self::$save_id; 
-		}
+            $save_id = self::$save_id; 
+        }
         if( !$encode && Util::isValue( $_POST[ self::$encode_id . $save_id ] ) ) {
             $encode = $_POST[ self::$encode_id . $save_id ];
         }
-        
+
         $data = array();
         if( Util::isValue( $_POST[ $save_id ] ) ) {
             $data = self::decodeData( $_POST[ $save_id ], $encode );
@@ -104,10 +104,10 @@ class WebIO
     {
         if( WORDY > 4 ) echo "<i>Web_IO::saveSession( $data, $save_id, $encode )</i>...<br>\n";
         if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
-		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
-        
+        if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
+
         $_SESSION[ $save_id ] = self::encodeData( $data, $encode );
-        
+
         return TRUE;
     }
     // +--------------------------------------------------------------- +
@@ -115,8 +115,8 @@ class WebIO
     {
         if( WORDY > 4 ) echo "<i>Web_IO::loadSession( $save_id, $encode )</i>...<br>\n";
         if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
-		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
-        
+        if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
+
         $data = NULL;
         if( empty( $_SESSION ) ) {
             session_start();
@@ -138,8 +138,8 @@ class WebIO
     {
         if( WORDY > 4 ) echo "<i>Web_IO::saveCookie( $data, $save_id, $encode, $save_time )</i>...<br>\n";
         if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
-		if( !Util::isValue( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
-        
+        if( !Util::isValue( $encode  ) ) { $encode  = self::ENCODE_CRYPT; }
+
         $cook_value = self::encodeData( $data, $encode );
         if( !$save_time ) {
             $success = setcookie( $save_id, $cook_value );
@@ -155,7 +155,7 @@ class WebIO
             $success = setcookie( $save_id, $cook_value, time()+$save_time );
         }
         setcookie( self::$encode_id . $save_id, $encode );
-        
+
         if( WORDY > 4 ) echo "setcookie( $save_id, $cook_value );<br>\n";
         if( $success ) {
             if( WORDY > 4 ) echo " -> saved data to COOKIE[{$save_id}]...<br>\n";
@@ -172,7 +172,7 @@ class WebIO
         if( !$encode && Util::isValue( $_COOKIE[ self::$encode_id . $save_id ] ) ) {
             $encode = $_COOKIE[ self::$encode_id . $save_id ];
         }
-        
+
         $data = array();
         if( @Util::isValue( $_COOKIE[ $save_id ] ) ) {
             $data = self::decodeData( $_COOKIE[ $save_id ], $encode );
@@ -185,8 +185,8 @@ class WebIO
         if( WORDY > 4 ) echo "<i>Web_IO::encodeData( $data, $encode )</i>...<br>\n";
         // encoding $data; $data can be an array
         // returns a seriarized string data.
-		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
-        
+        if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
+
         switch( $encode )
         {
             case self::ENCODE_JSON:
@@ -197,23 +197,23 @@ class WebIO
                 $en_data = base64_encode( $se_data );
                 break;
             case self::ENCODE_CRYPT:
-				if( !function_exists( 'mcrypt_encrypt' ) ) {
-					throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
-				}
-				// from: http://jp.php.net/manual/ja/function.mcrypt-encrypt.php
+                if( !function_exists( 'mcrypt_encrypt' ) ) {
+                    throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
+                }
+                // from: http://jp.php.net/manual/ja/function.mcrypt-encrypt.php
                 $se_data = serialize( $data );
-				$en_data = 
-					trim( base64_encode( mcrypt_encrypt( 
-								MCRYPT_RIJNDAEL_256, 
-								self::$crypt_pswd, 
-								$se_data, 
-								MCRYPT_MODE_ECB, 
-								mcrypt_create_iv( 
-									mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), 
-									MCRYPT_RAND
-								)
-					) ) ); 
-				break;
+                $en_data = 
+                    trim( base64_encode( mcrypt_encrypt( 
+                                MCRYPT_RIJNDAEL_256, 
+                                self::$crypt_pswd, 
+                                $se_data, 
+                                MCRYPT_MODE_ECB, 
+                                mcrypt_create_iv( 
+                                    mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), 
+                                    MCRYPT_RAND
+                                )
+                    ) ) ); 
+                break;
             case self::ENCODE_NONE:
             default:
                 $se_data = serialize( $data );
@@ -230,7 +230,7 @@ class WebIO
     {
         if( WORDY > 3 ) echo "<i>Web_IO::decodeData( $data, $encode )</i>...<br>\n";
         // decoding $data; $data is a seriarized string data of an PHP variable.
-        
+
         switch( $encode )
         {
             case self::ENCODE_JSON:
@@ -241,33 +241,33 @@ class WebIO
                 $un_data = unserialize( $de_data );
                 break;
             case self::ENCODE_CRYPT:
-				if( !function_exists( 'mcrypt_decrypt' ) ) {
-					throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
-				}
-				// from: http://jp.php.net/manual/ja/function.mcrypt-encrypt.php
-				$de_data = 
-					trim( mcrypt_decrypt(
-							MCRYPT_RIJNDAEL_256, 
-							self::$crypt_pswd, 
-							base64_decode( $data ), 
-							MCRYPT_MODE_ECB, 
-							mcrypt_create_iv(
-								mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), 
-								MCRYPT_RAND
-							)
-					) ); 
+                if( !function_exists( 'mcrypt_decrypt' ) ) {
+                    throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
+                }
+                // from: http://jp.php.net/manual/ja/function.mcrypt-encrypt.php
+                $de_data = 
+                    trim( mcrypt_decrypt(
+                            MCRYPT_RIJNDAEL_256, 
+                            self::$crypt_pswd, 
+                            base64_decode( $data ), 
+                            MCRYPT_MODE_ECB, 
+                            mcrypt_create_iv(
+                                mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), 
+                                MCRYPT_RAND
+                            )
+                    ) ); 
                 $un_data = unserialize( $de_data );
-				break;
+                break;
             case self::ENCODE_NONE:
             default:
                 $de_data = $data;
                 $un_data = unserialize( $de_data );
                 break;
         }
-        
+
         return $un_data;
     }
-	// +--------------------------------------------------------------- +
+    // +--------------------------------------------------------------- +
 }
 
 
