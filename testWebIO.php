@@ -1,9 +1,9 @@
 <?php
-use CenaDTA\Util\WebIO as WebIO;
 error_reporting( E_ALL );
 require_once( dirname( __FILE__ ) . "/Util.php" );
 require_once( dirname( __FILE__ ) . "/Web.php" );
 define( 'WORDY', 0 );
+use CenaDTA\Util\WebIO as WebIO;
 
 /**
  * PHPUnit test for Web Input/Output object.
@@ -39,6 +39,12 @@ class Util_WebIOTest extends PHPUnit_Framework_TestCase
         $html = WebIO::saveSession( $data, NULL, $encode_type );
         $this->assertTrue( !empty( $_SESSION[ $save_id] ) );
         $this->assertEquals( $_SESSION[ $save_id], $encoded );
+        
+        // test saveStorage
+        $js = WebIO::saveStorage( $data );
+        $this->assertTrue( $js );
+        $js = WebIO::loadStorage( $data );
+        $this->assertTrue( $js );
 	}
 	// +----------------------------------------------------------------------+
 	public function test_en_de_code()

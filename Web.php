@@ -6,6 +6,7 @@ class WebIO
 	const ENCODE_NONE         = 'none'; 
 	const ENCODE_BASE64       = 'base64'; 
 	const ENCODE_CRYPT        = 'crypt';
+    const ENCODE_JSON         = 'json';
     public static $save_id    = 'Dio_saveID';  // 
 	public static $encode_id  = 'Dio_Encode_Type_'; 
 	public static $encode_std = 'base64';
@@ -29,6 +30,42 @@ class WebIO
 		}
 		return self::$crypt_pswd;
 	}
+    // +--------------------------------------------------------------- +
+    static function saveStorage( $data, $save_id=NULL )
+    {
+        if( WORDY > 4 ) echo "<i>Web::saveStorage( $data, $save_id )</i>...<br>\n";
+        if( !Util::isValue( $save_id ) ) { 
+            $save_id = self::$save_id; 
+        }
+        $val   = self::encodeData( $data, self::ENCODE_JSON );
+        $enc_id= self::$encode_id;
+        $js    = 
+        "<script>
+          localStorage.setItem( 
+          '{$enc_id}', \"{$val}\" ) );
+        </script>";
+        return $js;
+    }
+    // +--------------------------------------------------------------- +
+    static function loadStorage( $save_id )
+    {
+        if( WORDY > 4 ) echo "<i>Web_IO::loadStorage( $save_id, $encode )</i>...<br>\n";
+        if( !Util::isValue( $save_id ) ) { 
+			$save_id = self::$save_id; 
+		}
+        $enc_id= self::$encode_id;
+        $encode= self::ENCODE_JSON;
+        $js    = 
+        "
+        <input type=\"hidden\" name=\"{$enc_id}\" id=\"{$enc_id}\">
+        <input type='hidden' name='{$enc_id}{$save_id}' value='{$encode}'>
+        <script>
+          document.getElementById( '{$enc_id}' ).vallue = 
+            JSON.stringify( localStorage.getItem( '{$enc_id}' ) );
+        </script>
+        ";
+        return $js;
+    }
     // +--------------------------------------------------------------- +
     static function savePost( $data, $save_id=NULL, $encode=NULL )
     {
@@ -69,9 +106,6 @@ class WebIO
         if( !Util::isValue( $save_id ) ) { $save_id = self::$save_id; }
 		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
         
-        if( empty( $_SESSION ) ) {
-            session_start();
-        }
         $_SESSION[ $save_id ] = self::encodeData( $data, $encode );
         
         return TRUE;
@@ -152,11 +186,14 @@ class WebIO
         // encoding $data; $data can be an array
         // returns a seriarized string data.
 		if( !Util::isValue( $encode  ) ) { $encode  = self::$encode_std; }
-        $se_data = serialize( $data );
         
         switch( $encode )
         {
+            case self::ENCODE_JSON:
+                $en_data = json_encode( $data );
+                break;
             case self::ENCODE_BASE64:
+                $se_data = serialize( $data );
                 $en_data = base64_encode( $se_data );
                 break;
             case self::ENCODE_CRYPT:
@@ -164,6 +201,7 @@ class WebIO
 					throw new Exception( 'mcrypt not installed @' . __CLASS__ , 9999 );
 				}
 				// from: http://jp.php.net/manual/ja/function.mcrypt-encrypt.php
+                $se_data = serialize( $data );
 				$en_data = 
 					trim( base64_encode( mcrypt_encrypt( 
 								MCRYPT_RIJNDAEL_256, 
@@ -178,6 +216,7 @@ class WebIO
 				break;
             case self::ENCODE_NONE:
             default:
+                $se_data = serialize( $data );
                 $en_data = $se_data;
                 break;
         }
@@ -194,8 +233,12 @@ class WebIO
         
         switch( $encode )
         {
+            case self::ENCODE_JSON:
+                $un_data = json_decode( $data );
+                break;
             case self::ENCODE_BASE64:
                 $de_data = base64_decode( $data );
+                $un_data = unserialize( $de_data );
                 break;
             case self::ENCODE_CRYPT:
 				if( !function_exists( 'mcrypt_decrypt' ) ) {
@@ -213,13 +256,14 @@ class WebIO
 								MCRYPT_RAND
 							)
 					) ); 
+                $un_data = unserialize( $de_data );
 				break;
             case self::ENCODE_NONE:
             default:
                 $de_data = $data;
+                $un_data = unserialize( $de_data );
                 break;
         }
-        $un_data = unserialize( $de_data );
         
         return $un_data;
     }
