@@ -302,7 +302,7 @@ class Validator
      */
     function request( $name, $type='asis', $filter=array(), &$error=NULL, $data=NULL ) {
         if( $data === NULL ) $data = $_REQUEST;
-        $success = self::find( $data, $name, &$value, $type, $filter, $error );
+        $success = self::find( $data, $name, $value, $type, $filter, $error );
         if( !$success ) {
             $found = FALSE;
         }
