@@ -51,11 +51,15 @@ class Verify
     }
     // +--------------------------------------------------------------- +
     /**
-     * returns verified data. 
+     * sets external repository for verified data. 
+     * and returns verified data. 
      * @param array $data    not sure its use. 
      * @return array         verified data. 
      */
-    static function data( $data=NULL ) {
+    static function data( &$data=NULL ) {
+        if( !is_null( $data ) && is_array( $data ) ) {
+            self::$data = &$data;
+        }
         return self::$data;
     }
     // +--------------------------------------------------------------- +
@@ -69,7 +73,7 @@ class Verify
      *                       returns NULL if not found and validated.
      *                       returns FALSE if not validated. 
      */
-    static function verify( $name, $type='asis', $filter=array() ) {
+    static function _validate( $name, $type='asis', $filter=array() ) {
         $error   = NULL;
         $value   = NULL;
         $success = Validator::find( self::$source, $name, $value, $type, $filter, $error );
@@ -111,7 +115,7 @@ class Verify
         
         $args = array_slice( $args, 2 );
         $filter = Util::getArgs( $args, array( 'required', 'pattern', 'default' ) );
-        self::verify( $name, $type, $filter );
+        self::_validate( $name, $type, $filter );
     }
     // +--------------------------------------------------------------- +
     /**
