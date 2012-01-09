@@ -6,20 +6,105 @@
 
 class Dispatch
 {
+    // ---------------------------------
+    /**
+     * @var null    object model.
+     */
     var $model   = NULL;
+    /**
+     * @var array   list of models. nextModel sets model to the next.
+     */
+    var $models  = array();
+    /**
+     * @var null    name of next action.
+     */
     var $nextAct = NULL;
+    /**
+     * @var null    name of current action.
+     */
     var $currAct = NULL;
+    /**
+     * @var null    name of original dispatched action.
+     */
+    // ---------------------------------
+    var $dispatchAct= NULL;
+    /**
+     * @var string   default exec name if not matched.
+     */
     var $defaultAct = 'default';
-    var $hookBefore = FALSE;
-    var $hookAfter  = FALSE;
+    // ---------------------------------
+    /**
+     * @var null     hook action name before execution.
+     */
+    var $hookBefore = NULL;
+    /**
+     * @var null     hook action name after execution.
+     */
+    var $hookAfter  = NULL;
     // +-------------------------------------------------------------+
+    /**
+     * set/get model.
+     * @param null $model
+     *     specify model to use. the second model specified is stored
+     *     in models array, and can be used by nextModel.
+     * @return mix    returns current model.
+     */
     function model( $model=NULL ) {
         if( $model !== NULL ) {
-            $this->model = $model;
+            $this->addModel( $model );
         }
         return $this->model;
     }
     // +-------------------------------------------------------------+
+    /**
+     * adds models to Dispatcher.
+     * the first model is set to $this->model, the subsequent ones
+     * are stored in $this->models[].
+     * @param $model      model class or object.
+     * @return Dispatch   returns this.
+     */
+    function addModel( $model ) {
+        if( is_null( $this->model ) ) {
+            $this->model = $model;
+        }
+        else {
+            $this->models[] = $model;
+        }
+        return $this;
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * use next model. for instance, the models can be: auth,
+     * cache, data model, and view.
+     * @param null $nextAct
+     *     sets action name to start the next model. if not set,
+     *     uses current action.
+     * @return Dispatch       returns this.
+     * @throws RuntimeException
+     *     if next model does not exist.
+     */
+    function nextModel( $nextAct=NULL ) {
+        if( isset( $this->models[0] ) ) {
+            // replace model with the next model.
+            $this->model = $this->models[0];
+            array_slice( $this->models, 1 );
+            // sets next action for the next model.
+            if( $nextAct === NULL ) {
+                $this->nextAct( $this->currAct() );
+            }
+            else {
+                $this->nextAct( $nextAct );
+            }
+            return $this;
+        }
+        throw new RuntimeException( 'no next model in Dispatch. ' );
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * set/get next action.
+     * @param null $action   sets next action if set.
+     * @return string        returns next action.
+     */
     function nextAct( $action=NULL ) {
         if( $action !== NULL ) {
             $this->nextAct = $action;
@@ -27,6 +112,11 @@ class Dispatch
         return $this->nextAct;
     }
     // +-------------------------------------------------------------+
+    /**
+     * set/get current action.
+     * @param null $action    sets current action if set.
+     * @return string         returns current action.
+     */
     function currAct( $action=NULL ) {
         if( $action !== NULL ) {
             $this->currAct = $action;
@@ -34,6 +124,10 @@ class Dispatch
         return $this->currAct;
     }
     // +-------------------------------------------------------------+
+    /**
+     * @param null $action
+     * @return string
+     */
     function defaultAct( $action=NULL ) {
         if( $action !== NULL ) {
             $this->defaultAct = $action;
@@ -41,6 +135,10 @@ class Dispatch
         return $this->defaultAct;
     }
     // +-------------------------------------------------------------+
+    /**
+     * @param null $action
+     * @return null
+     */
     function hookBefore( $action=NULL ) {
         if( $action !== NULL ) {
             $this->hookBefore = $action;
@@ -48,6 +146,10 @@ class Dispatch
         return $this->hookBefore;
     }
     // +-------------------------------------------------------------+
+    /**
+     * @param null $action
+     * @return null
+     */
     function hookAfter( $action=NULL ) {
         if( $action !== NULL ) {
             $this->hookAfter = $action;
@@ -55,22 +157,29 @@ class Dispatch
         return $this->hookAfter;
     }
     // +-------------------------------------------------------------+
-    function dispatch( $action, $data=NULL ) {
+    /**
+     * starts loop. I think this is chain of responsibility pattern.
+     * @param $action           name of action to start.
+     * @param null $data        data to pass to each exec method.
+     * @return bool|mixed|null  returns the last returned value.
+     */
+    function dispatch( $action, $data=NULL )
+    {
         // set current action.
+        $return = NULL;
+        $this->dispatchAct = $action;
         $this->currAct( $action );
         // -----------------------------
         // do the hook before action.
         $exec = $this->getExecFromAction( $this->hookBefore );
         if( $exec ) {
-            $this->execute( $this->hookBefore, $data );
+            $return = $this->execute( $exec, $data );
         }
         // -----------------------------
         // chain of responsibility loop.
-        $return = NULL;
         while( $action ) {
             $this->nextAct( FALSE );
             $return = $this->execAction( $action, $data );
-            if( $return === FALSE ) exit;
             $action = $this->nextAct();
             $this->currAct( $action );
         }
@@ -78,15 +187,29 @@ class Dispatch
         // do the hook after action.
         $exec = $this->getExecFromAction( $this->hookAfter );
         if( $exec ) {
-            $this->execute( $this->hookAfter, $data );
+            $return = $this->execute( $exec, $data );
         }
         return $return;
     }
     // +-------------------------------------------------------------+
+    /**
+     * executes the function/method.
+     * @param callback $exec  callable object (function or obj/method).
+     * @param null $data      data to pass if any.
+     * @return bool|mixed     returned value from exec object.
+     */
     function execute( $exec, $data=NULL ) {
-        return call_user_func( $exec, array( $this, $data ) );
+        $return = call_user_func( $exec, array( $this, $data ) );
+        if( $return === FALSE ) exit;
+        return $return;
     }
     // +-------------------------------------------------------------+
+    /**
+     * get exec object from action name.
+     * either it is a model/method or function.
+     * @param string $action   name of action.
+     * @return array|bool      found exec object.
+     */
     function getExecFromAction( $action ) {
         $exec = FALSE;
         if( !$action ) return $exec;
@@ -100,6 +223,12 @@ class Dispatch
         return $exec;
     }
     // +-------------------------------------------------------------+
+    /**
+     * execute action based on action name and default.
+     * @param $action      name of action to execute.
+     * @param null $data   data to pass if any.
+     * @return bool|mixed  returned value from exec object.
+     */
     function execAction( $action, $data=NULL ) {
         $exec = $this->getExecFromAction( $action );
         if( !$exec ) {
@@ -114,9 +243,59 @@ class Dispatch
 }
 
 /*
+
+class auth {
+    function default( $ctrl, $data ) {
+        if( $login ) {
+            $ctrl->nextModel();
+        }
+        else {
+            $ctrl->nextModel( 'loginForm' );
+        }
+    }
+}
+
+class cache {
+    function user( $ctrl, $data ) {
+        // check if user html is in cache.
+        // show cached html, and
+        return FALSE;
+    }
+    function LoginForm( $ctrl, $data ) {
+        // check if login form is in cache.
+        // show cached html, and
+        return FALSE;
+    }
+}
+
+class model {
+    function user( $ctrl, $data ) {
+    }
+    function LoginForm( $ctrl, $data ) {
+        // do nothing.
+    }
+}
+
+class view {
+    function user( $ctrl, $data ) {
+    }
+    function loginForm( $ctrl, $data ) {
+        // show login form.
+    }
+}
+
+$ctrl = new Dispatch();
+    ->addModel( 'auth' )
+    ->addModel( 'cache' )
+    ->addModel( 'model' )
+    ->addModel( 'view' )
+    ->dispatch( 'user' );
+
+*/
+/*
 class sample_dispatch
 {
-    function someAction( $ctrl, $data ) {
+    function startAction( $ctrl, $data ) {
         $ctrl->nextAct( 'moreAction' );
     }
     function moreAction( $ctrl,$data ) {
@@ -124,10 +303,21 @@ class sample_dispatch
     }
 }
 
+function done( $ctrl, $data ) {
+    $ctrl->nextModel( 'finalAct' );
+}
+
+class more_dispatch
+{
+    function finalAct( $ctrl, $data ) {
+    }
+}
+
 $data = array( 'test' => 'test' );
 $ctrl = new Dispatch();
-$ctrl->setModel( 'sample_dispatch' );
-$ctrl->dispatch( 'someAction', $data );
+$ctrl->model( 'sample_dispatch' );
+$ctrl->model( 'more_dispatch' );
+$ctrl->dispatch( 'startAction', $data );
 
 */
 
