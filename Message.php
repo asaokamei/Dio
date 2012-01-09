@@ -11,7 +11,7 @@ class Message
     const  ERROR        = 2;
     const  CRITICAL     = 3;
     const  FATAL        = 4;
-    var    $msg_array    = array();
+    var    $msg_array   = array();
     var    $error_level = 0;
     var    $disp_func   = FALSE;
     function __construct() {
