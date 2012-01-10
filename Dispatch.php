@@ -16,6 +16,8 @@ class Dispatch
      * @var array   list of models. nextModel sets model to the next.
      */
     var $models  = array();
+    
+    // ---------------------------------
     /**
      * @var null    name of next action.
      */
@@ -27,13 +29,12 @@ class Dispatch
     /**
      * @var null    name of original dispatched action.
      */
-    // ---------------------------------
     var $dispatchAct= NULL;
     /**
      * @var string   default exec name if not matched.
      */
     var $defaultAct = 'default';
-    
+
     // +-------------------------------------------------------------+
     /**
      * set/get model.
@@ -64,6 +65,37 @@ class Dispatch
             $this->models[] = $model;
         }
         return $this;
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * use next model. for instance, the models can be: auth,
+     * cache, data model, and view.
+     * @param null $nextAct
+     *     sets action name to start the next model. if not set,
+     *     uses current action.
+     * @return bool/string    next action if next model exists. FALSE if not.
+     */
+    function nextModel( $nextAct=NULL ) {
+        if( isset( $this->models[0] ) ) {
+            // replace model with the next model.
+            $this->model = $this->models[0];
+            array_slice( $this->models, 1 );
+            // sets next action for the next model.
+            if( $nextAct === NULL ) {
+                $this->nextAct( $this->currAct() );
+            }
+            else {
+                $this->nextAct( $nextAct );
+            }
+            return $nextAct;
+        }
+        return FALSE;
+    }    // +-------------------------------------------------------------+
+    /**
+     * @return bool   TRUE if more models exists.
+     */
+    function moreModels() {
+        return !empty( $this->models );
     }
     // +-------------------------------------------------------------+
     /**
@@ -122,11 +154,16 @@ class Dispatch
         $this->currAct( $action );
         // -----------------------------
         // chain of responsibility loop.
-        while( $action ) {
-            $this->nextAct( FALSE );
+        while( $action  )
+        {
+            $this->nextAct( FALSE ); // reset next action.
             $return = $this->execAction( $action, $data );
             $action = $this->nextAct();
-            $this->currAct( $action );
+            // automatically advance to next model.
+            if( !$action &&  // next action not set
+                $this->moreModels() ) { // still model exists
+                $action = $this->nextModel(); // advance model using current action
+            }
         }
         // -----------------------------
         return $return;
