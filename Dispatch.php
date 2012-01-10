@@ -2,6 +2,7 @@
 /**
  * Dispatcher for application controller.
  * uses Chain of Responsibility pattern...
+ * TODO: even if cache is hit, models and views are loaded.
  */
 
 class Dispatch
@@ -32,15 +33,7 @@ class Dispatch
      * @var string   default exec name if not matched.
      */
     var $defaultAct = 'default';
-    // ---------------------------------
-    /**
-     * @var null     hook action name before execution.
-     */
-    var $hookBefore = NULL;
-    /**
-     * @var null     hook action name after execution.
-     */
-    var $hookAfter  = NULL;
+    
     // +-------------------------------------------------------------+
     /**
      * set/get model.
@@ -76,26 +69,6 @@ class Dispatch
     /**
      * use next model. for instance, the models can be: auth,
      * cache, data model, and view.
-     * @param null $nextAct
-     *     sets action name to start the next model. if not set,
-     *     uses current action.
-     * @return Dispatch       returns this.
-     * @throws RuntimeException
-     *     if next model does not exist.
-     */
-    function nextModel( $nextAct=NULL ) {
-        if( isset( $this->models[0] ) ) {
-            // replace model with the next model.
-            $this->model = $this->models[0];
-            array_slice( $this->models, 1 );
-            // sets next action for the next model.
-            if( $nextAct === NULL ) {
-                $this->nextAct( $this->currAct() );
-            }
-            else {
-                $this->nextAct( $nextAct );
-            }
-            return $this;
         }
         throw new RuntimeException( 'no next model in Dispatch. ' );
     }
@@ -136,28 +109,6 @@ class Dispatch
     }
     // +-------------------------------------------------------------+
     /**
-     * @param null $action
-     * @return null
-     */
-    function hookBefore( $action=NULL ) {
-        if( $action !== NULL ) {
-            $this->hookBefore = $action;
-        }
-        return $this->hookBefore;
-    }
-    // +-------------------------------------------------------------+
-    /**
-     * @param null $action
-     * @return null
-     */
-    function hookAfter( $action=NULL ) {
-        if( $action !== NULL ) {
-            $this->hookAfter = $action;
-        }
-        return $this->hookAfter;
-    }
-    // +-------------------------------------------------------------+
-    /**
      * starts loop. I think this is chain of responsibility pattern.
      * @param $action           name of action to start.
      * @param null $data        data to pass to each exec method.
@@ -170,12 +121,6 @@ class Dispatch
         $this->dispatchAct = $action;
         $this->currAct( $action );
         // -----------------------------
-        // do the hook before action.
-        $exec = $this->getExecFromAction( $this->hookBefore );
-        if( $exec ) {
-            $return = $this->execute( $exec, $data );
-        }
-        // -----------------------------
         // chain of responsibility loop.
         while( $action ) {
             $this->nextAct( FALSE );
@@ -184,11 +129,6 @@ class Dispatch
             $this->currAct( $action );
         }
         // -----------------------------
-        // do the hook after action.
-        $exec = $this->getExecFromAction( $this->hookAfter );
-        if( $exec ) {
-            $return = $this->execute( $exec, $data );
-        }
         return $return;
     }
     // +-------------------------------------------------------------+
