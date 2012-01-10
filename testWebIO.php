@@ -1,6 +1,6 @@
 <?php
 error_reporting( E_ALL );
-require_once( dirname( __FILE__ ) . "/Util.php" );
+require_once( dirname( __FILE__ ) . "/../Util/Util.php" );
 require_once( dirname( __FILE__ ) . "/Web.php" );
 define( 'WORDY', 0 );
 use CenaDTA\Util\WebIO as WebIO;

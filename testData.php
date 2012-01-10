@@ -2,7 +2,7 @@
 use CenaDTA\Util\Data as DataIO;
 error_reporting( E_ALL );
 require_once( dirname( __FILE__ ) . "/Data.php" );
-require_once( dirname( __FILE__ ) . "/Validator.php" );
+require_once( dirname( __FILE__ ) . "/../Util/Validator.php" );
 define( 'WORDY', 0 );
 
 /**

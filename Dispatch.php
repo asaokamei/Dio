@@ -16,7 +16,7 @@ class Dispatch
      * @var array   list of models. nextModel sets model to the next.
      */
     var $models  = array();
-    
+
     // ---------------------------------
     /**
      * @var null    name of next action.
