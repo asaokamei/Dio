@@ -36,6 +36,10 @@ class Dispatch
     var $defaultAct = 'default';
 
     // +-------------------------------------------------------------+
+    function __construct() {
+        // nothing.
+    }
+    // +-------------------------------------------------------------+
     /**
      * set/get model.
      * @param null $model
