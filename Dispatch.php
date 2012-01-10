@@ -150,7 +150,7 @@ class Dispatch
      * @param null $data        data to pass to each exec method.
      * @return bool|mixed|null  returns the last returned value.
      */
-    function dispatch( $action, $data=NULL )
+    function dispatch( $action, &$data=NULL )
     {
         // set current action.
         $return = NULL;
