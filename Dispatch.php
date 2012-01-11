@@ -34,7 +34,10 @@ class Dispatch
      * @var string   default exec name if not matched.
      */
     var $defaultAct = 'default';
-
+    /**
+     * @var string   prefix for action to func/method name.
+     */
+    var $preAction = 'action';
     // +-------------------------------------------------------------+
     function __construct() {
         // nothing.
@@ -180,7 +183,7 @@ class Dispatch
      * @return bool|mixed     returned value from exec object.
      */
     function execute( $exec, $data=NULL ) {
-        $return = call_user_func( $exec, array( $this, $data ) );
+        $return = call_user_func_array( $exec, array( $this, $data ) );
         if( $return === FALSE ) exit;
         return $return;
     }
@@ -194,6 +197,9 @@ class Dispatch
     function getExecFromAction( $action ) {
         $exec = FALSE;
         if( !$action ) return $exec;
+        if( $this->preAction ) {
+            $action = $this->preAction . ucwords( $action );
+        }
         if( isset( $this->model ) && is_callable( array( $this->model, $action ) ) ) {
             $exec = array( $this->model, $action );
         }
@@ -215,7 +221,7 @@ class Dispatch
         if( !$exec ) {
             $exec = $this->getExecFromAction( $this->defaultAct );
         }
-        if( isset( $exec ) ) {
+        if( $exec ) {
             return $this->execute( $exec, $data );
         }
         return FALSE;
