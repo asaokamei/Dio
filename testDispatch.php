@@ -28,7 +28,35 @@ class oneModel
 class defaultTestModel
 {
     function actionDefault( $ctrl ) {
+        global $test_dispatch;
+        $test_dispatch .= 'default ';
+        $ctrl->nextAct( 'done' );
+    }
+    function actionDone( $ctrl, $data ) {
+        global $test_dispatch;
+        $test_dispatch .= 'defaultDone ';
+    }
+}
 
+class chainAuth
+{
+    function actionDefault( $ctrl, &$data ) {
+        $data .= 'defaultAuth ';
+    }
+}
+
+class chainModel
+{
+    function actionStart( $ctrl, &$data ) {
+        $data .= 'startModel ';
+        $ctrl->nextModel( 'normal' );
+    }
+}
+
+class chainView
+{
+    function actionNormal( $ctrl, &$data ) {
+        $data .= 'normalView ';
     }
 }
 
@@ -41,6 +69,30 @@ class Util_DispatchTest extends PHPUnit_Framework_TestCase
         global $test_dispatch;
         $test_dispatch  = FALSE;
         $this->dispatch = new Dispatch();
+    }
+    // +----------------------------------------------------------------------+
+    function test_chainModel() {
+        $chained = 'chain: ';
+        $this->dispatch
+            ->addModel( 'chainAuth' )
+            ->addModel( 'chainModel' )
+            ->addModel( 'chainView' );
+        $this->dispatch->dispatch( 'start', $chained );
+        $this->assertEquals( 'chain: defaultAuth startModel normalView ', $chained );
+    }
+    // +----------------------------------------------------------------------+
+    function test_DefaultModel() {
+        global $test_dispatch;
+        $model = 'defaultTestModel';
+        $this->dispatch->model( $model );
+
+        // check if model is set.
+        $check = $this->dispatch->model();
+        $this->assertEquals( $model, $check );
+
+        // dispatch simple function: test_func.
+        $this->dispatch->dispatch( 'start' );
+        $this->assertEquals( 'default defaultDone ', $test_dispatch );
     }
     // +----------------------------------------------------------------------+
     function test_SingleModel() {
