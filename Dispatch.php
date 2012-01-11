@@ -89,7 +89,7 @@ class Dispatch
             $this->models = array_slice( $this->models, 1 );
             // sets next action for the next model.
             if( $nextAct === NULL ) {
-                $this->nextAct( $this->currAct() );
+                $nextAct = $this->nextAct( $this->currAct() );
             }
             else {
                 $this->nextAct( $nextAct );
