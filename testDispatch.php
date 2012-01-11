@@ -47,6 +47,9 @@ class chainAuth
 
 class chainModel
 {
+    function actionDefault( $ctrl, &$data ) {
+        $data .= 'defaultModel ';
+    }
     function actionStart( $ctrl, &$data ) {
         $data .= 'startModel ';
         $ctrl->nextModel( 'normal' );
@@ -55,6 +58,9 @@ class chainModel
 
 class chainView
 {
+    function actionDefault( $ctrl, &$data ) {
+        $data .= 'defaultView ';
+    }
     function actionNormal( $ctrl, &$data ) {
         $data .= 'normalView ';
     }
