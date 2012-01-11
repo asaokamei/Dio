@@ -85,8 +85,8 @@ class Dispatch
     function nextModel( $nextAct=NULL ) {
         if( isset( $this->models[0] ) ) {
             // replace model with the next model.
-            $this->model = $this->models[0];
-            array_slice( $this->models, 1 );
+            $this->model  = $this->models[0];
+            $this->models = array_slice( $this->models, 1 );
             // sets next action for the next model.
             if( $nextAct === NULL ) {
                 $this->nextAct( $this->currAct() );
@@ -182,8 +182,8 @@ class Dispatch
      * @param null $data      data to pass if any.
      * @return bool|mixed     returned value from exec object.
      */
-    function execute( $exec, $data=NULL ) {
-        $return = call_user_func_array( $exec, array( $this, $data ) );
+    function execute( $exec, &$data=NULL ) {
+        $return = call_user_func_array( $exec, array( $this, &$data ) );
         if( $return === FALSE ) exit;
         return $return;
     }
@@ -216,7 +216,7 @@ class Dispatch
      * @param null $data   data to pass if any.
      * @return bool|mixed  returned value from exec object.
      */
-    function execAction( $action, $data=NULL ) {
+    function execAction( $action, &$data=NULL ) {
         $exec = $this->getExecFromAction( $action );
         if( !$exec ) {
             $exec = $this->getExecFromAction( $this->defaultAct );
