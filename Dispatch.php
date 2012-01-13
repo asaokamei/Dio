@@ -227,6 +227,9 @@ class Dispatch
         $exec = FALSE;
         if( !$action ) return $exec;
         $action = $this->prefix . ucwords( $action );
+        if( isset( $this->model ) ) {
+            $this->loadModel( $this->model );
+        }
         if( isset( $this->model ) && is_callable( array( $this->model, $action ) ) ) {
             $exec = array( $this->model, $action );
         }
@@ -235,6 +238,14 @@ class Dispatch
             $exec = $action;
         }
         return $exec;
+    }
+    // +-------------------------------------------------------------+
+    function loadModel( $model ) {
+        if( class_exists( $model, FALSE ) ) return TRUE;
+        if( file_exists( $model.'.php' ) ) {
+            require_once( $model . '.php' );
+            return TRUE;
+        }
     }
     // +-------------------------------------------------------------+
     /**
