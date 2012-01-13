@@ -111,10 +111,10 @@ class Util_DispatchTest extends PHPUnit_Framework_TestCase
     function test_DefaultModel() {
         global $test_dispatch;
         $model = 'defaultTestModel';
-        $this->dispatch->model( $model );
+        $this->dispatch->addModel( $model );
 
         // check if model is set.
-        $check = $this->dispatch->model();
+        $check = $this->dispatch->getModel();
         $this->assertEquals( $model, $check );
 
         // dispatch simple function: test_func.
@@ -125,10 +125,10 @@ class Util_DispatchTest extends PHPUnit_Framework_TestCase
     function test_SingleModel() {
         global $test_dispatch;
         $model = 'oneModel';
-        $this->dispatch->model( $model );
+        $this->dispatch->addModel( $model );
 
         // check if model is set.
-        $check = $this->dispatch->model();
+        $check = $this->dispatch->getModel();
         $this->assertEquals( $model, $check );
 
         // dispatch simple function: test_func.
@@ -139,10 +139,10 @@ class Util_DispatchTest extends PHPUnit_Framework_TestCase
     function test_Dispatch() {
         global $test_dispatch;
         $model = 'test';
-        $this->dispatch->model( $model );
+        $this->dispatch->addModel( $model );
 
         // check if model is set.
-        $check = $this->dispatch->model();
+        $check = $this->dispatch->getModel();
         $this->assertEquals( $model, $check );
 
         // dispatch simple function: test_func.

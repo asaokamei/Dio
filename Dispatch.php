@@ -41,31 +41,25 @@ class Dispatch
     /**
      * @var string   prefix for action to func/method name.
      */
-    var $preAction = 'action';
+    var $prefix = 'action';
     // +-------------------------------------------------------------+
     function __construct() {
         // nothing.
     }
     // +-------------------------------------------------------------+
     /**
-     * set/get model.
-     * @param null $model
-     *     specify model to use. the second model specified is stored
-     *     in models array, and can be used by nextModel.
-     * @param $name   name of model.
-     * @return mix    returns current model.
+     * get current model.
+     * @return string    current model.
      */
-    function model( $model=NULL, $name=NULL ) {
-        if( $model !== NULL ) {
-            $this->addModel( $model, $name );
-        }
+    function getModel() {
         return $this->model;
     }
     // +-------------------------------------------------------------+
     /**
+     * get current model name.
      * @return string     returns current model name.
      */
-    function modelName() {
+    function getModelName() {
         return $this->modelName;
     }
     // +-------------------------------------------------------------+
@@ -117,7 +111,6 @@ class Dispatch
     /**
      * set current model to given name.
      * @param $name           name of model to set.
-     * @param null $action    next action if any.
      * @return bool|string    returns model name set, or false if not found.
      */
     function useModel( $name ) {
@@ -226,15 +219,14 @@ class Dispatch
     /**
      * get exec object from action name.
      * either it is a model/method or function.
+     * TODO: is it necessary to support function?
      * @param string $action   name of action.
      * @return array|bool      found exec object.
      */
     function getExecFromAction( $action ) {
         $exec = FALSE;
         if( !$action ) return $exec;
-        if( $this->preAction ) {
-            $action = $this->preAction . ucwords( $action );
-        }
+        $action = $this->prefix . ucwords( $action );
         if( isset( $this->model ) && is_callable( array( $this->model, $action ) ) ) {
             $exec = array( $this->model, $action );
         }
