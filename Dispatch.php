@@ -240,12 +240,18 @@ class Dispatch
         return $exec;
     }
     // +-------------------------------------------------------------+
+    /**
+     * @param string $model    $model (i.e. class name) to load
+     * @return bool
+     */
     function loadModel( $model ) {
         if( class_exists( $model, FALSE ) ) return TRUE;
         if( file_exists( $model.'.php' ) ) {
-            require_once( $model . '.php' );
+            /** @define "string" "model, class name" */
+            require_once( "{$model}.php" );
             return TRUE;
         }
+        return FALSE;
     }
     // +-------------------------------------------------------------+
     /**
