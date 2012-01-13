@@ -13,6 +13,10 @@ class Dispatch
      */
     var $model   = NULL;
     /**
+     * @var null    current model name.
+     */
+    var $modelName = NULL;
+    /**
      * @var array   list of models. nextModel sets model to the next.
      */
     var $models  = array();
@@ -48,13 +52,21 @@ class Dispatch
      * @param null $model
      *     specify model to use. the second model specified is stored
      *     in models array, and can be used by nextModel.
+     * @param $name   name of model.
      * @return mix    returns current model.
      */
-    function model( $model=NULL ) {
+    function model( $model=NULL, $name=NULL ) {
         if( $model !== NULL ) {
-            $this->addModel( $model );
+            $this->addModel( $model, $name );
         }
         return $this->model;
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * @return string     returns current model name.
+     */
+    function modelName() {
+        return $this->modelName;
     }
     // +-------------------------------------------------------------+
     /**
@@ -62,14 +74,16 @@ class Dispatch
      * the first model is set to $this->model, the subsequent ones
      * are stored in $this->models[].
      * @param $model      model class or object.
+     * @param $name       name of model.
      * @return Dispatch   returns this.
      */
-    function addModel( $model ) {
+    function addModel( $model, $name=NULL ) {
         if( is_null( $this->model ) ) {
             $this->model = $model;
+            $this->modelName = $name;
         }
         else {
-            $this->models[] = $model;
+            $this->models[] = array( $model, $name );
         }
         return $this;
     }
@@ -85,7 +99,8 @@ class Dispatch
     function nextModel( $nextAct=NULL ) {
         if( isset( $this->models[0] ) ) {
             // replace model with the next model.
-            $this->model  = $this->models[0];
+            $this->model  = $this->models[0][0];
+            $this->modelName = $this->models[0][1];
             $this->models = array_slice( $this->models, 1 );
             // sets next action for the next model.
             if( $nextAct === NULL ) {
@@ -97,7 +112,27 @@ class Dispatch
             return $nextAct;
         }
         return FALSE;
-    }    // +-------------------------------------------------------------+
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * set current model to given name.
+     * @param $name           name of model to set.
+     * @param null $action    next action if any.
+     * @return bool|string    returns model name set, or false if not found.
+     */
+    function useModel( $name ) {
+        while( $this->models ) {
+            if( $name === $this->models[0][1] ) {
+                return $name;
+            }
+            else {
+                $this->models = array_slice( $this->models, 1 );
+            }
+        }
+        // should throw an exception, maybe.
+        return FALSE;
+    }
+    // +-------------------------------------------------------------+
     /**
      * @return bool   TRUE if more models exists.
      */

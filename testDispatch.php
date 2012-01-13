@@ -43,6 +43,10 @@ class chainAuth
     function actionDefault( $ctrl, &$data ) {
         $data .= 'defaultAuth ';
     }
+    function actionSkip( $ctrl, &$data ) {
+        $data .= 'skipAuth ';
+        $ctrl->useModel( 'view' );
+    }
 }
 
 class chainModel
@@ -54,6 +58,9 @@ class chainModel
         $data .= 'startModel ';
         $ctrl->nextModel( 'normal' );
     }
+    function actionSkip( $ctrl, &$data ) {
+        $data .= 'skipModel ';
+    }
 }
 
 class chainView
@@ -63,6 +70,10 @@ class chainView
     }
     function actionNormal( $ctrl, &$data ) {
         $data .= 'normalView ';
+    }
+    function actionSkip( $ctrl, &$data ) {
+        $data .= 'skipView ';
+        $ctrl->nextModel( 'normal' );
     }
 }
 
@@ -75,6 +86,16 @@ class Util_DispatchTest extends PHPUnit_Framework_TestCase
         global $test_dispatch;
         $test_dispatch  = FALSE;
         $this->dispatch = new Dispatch();
+    }
+    // +----------------------------------------------------------------------+
+    function test_chainSkip() {
+        $chained = 'skip: ';
+        $this->dispatch
+            ->addModel( 'chainAuth',  'auth' )
+            ->addModel( 'chainModel', 'model' )
+            ->addModel( 'chainView',  'view' );
+        $this->dispatch->dispatch( 'skip', $chained );
+        $this->assertEquals( 'skip: skipAuth skipView ', $chained );
     }
     // +----------------------------------------------------------------------+
     function test_chainModel() {
