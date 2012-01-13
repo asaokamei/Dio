@@ -28,7 +28,8 @@ class Router
      */
     function routeUri( $uri=NULL, $script=NULL ) {
         if( $uri === NULL ) {
-            $uri = explode( '/', $_SERVER[ 'REQUEST_URI' ] );
+            $uri = preg_replace('@[\/]{2,}@', '/', $_SERVER[ 'REQUEST_URI' ] );
+            $uri = explode( '/', $uri );
         }
         if( $script === NULL ) {
             $script = explode( '/', $_SERVER[ 'SCRIPT_NAME' ] );
