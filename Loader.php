@@ -1,10 +1,17 @@
 <?php
 namespace CenaDta\App;
 
+/**
+ * dumb/simple application loader.
+ * currently, it searches app.php or action.php is subsequent folders.
+ * this maybe slow.
+ * TODO: use route map for finding applications.
+ */
 class Loader
 {
     static $location;
     static $postfix = NULL;
+    static $prefix  = '.';
     // +-------------------------------------------------------------+
     static function _init() {
     }
@@ -15,7 +22,16 @@ class Loader
         return static::$location;
     }
     // +-------------------------------------------------------------+
-    function actionDefault( $ctrl, $requests ) {
+    /**
+     * loads application based on folder structure.
+     * say, uri is 'action/action2/...', this loader looks for
+     * app.php, action.php, first. if not found, searches for
+     * action/app.php, then action/action2.php.
+     * @param $ctrl
+     * @param $requests
+     * @return bool        TRUE if app found, FALSE if not found.
+     */
+    function actionDefault( $ctrl, &$requests ) {
         \Debug::w1( "Loader::actionDefault(), location=".static::$location );
         // loads from existing app file.
         $action = $requests[0];
@@ -25,17 +41,30 @@ class Loader
         else {
             $extetion = '_' . self::$postfix . '.php';
         }
+        $prefix = self::$prefix;
+
+        // load application.
+
+        // try loading action/app.php
+        $file_name = static::$location . "/{$prefix}app{$extetion}";
+        if( file_exists( $file_name ) ) {
+            include( $file_name );
+            return TRUE;
+        }
+        // try loading action.php script.
         $file_name = static::$location . "/{$action}{$extetion}";
         if( file_exists( $file_name ) ) {
             include( $file_name );
-            return;
+            return TRUE;
         }
-        $file_name = static::$location . "/{$action}/app{$extetion}";
-        if( file_exists( $file_name ) ) {
-            include( $file_name );
-            return;
+        // try load in subsequent folder.
+        $folder = static::$location . "/{$action}";
+        if( is_dir( $folder ) ) {
+            $sub_req = array_slice( $requests, 1 );
+            return self::actionDefault( $ctrl, $sub_req );
         }
         $ctrl->nextAct( 'Err404' );
+        return;
     }
     // +-------------------------------------------------------------+
     function actionErr404( $ctrl, $data ) {
