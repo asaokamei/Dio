@@ -223,7 +223,8 @@ class Dispatch
      */
     function execute( $exec, &$data=NULL ) {
         $return = call_user_func_array( $exec, array( $this, &$data ) );
-        if( $return === FALSE ) exit;
+        // note: not to exit on return FALSE;
+        // should create breakChain method in Dispatcher.
         return $return;
     }
     // +-------------------------------------------------------------+
