@@ -34,6 +34,11 @@ class Loader
         }
     }
     // +-------------------------------------------------------------+
+    function actionErr404( $ctrl, $data ) {
+        // do something about error 404, a file not found.
+        \Debug::put( 'Loader::Err404 happened!<br />' );
+    }
+    // +-------------------------------------------------------------+
     /**
      * loads application based on folder structure.
      * say, uri is 'action/action2/...', this loader looks for
@@ -76,11 +81,6 @@ class Loader
             return $file_name;
         }
         return FALSE;
-    }
-    // +-------------------------------------------------------------+
-    function actionErr404( $ctrl, $data ) {
-        // do something about error 404, a file not found.
-        \Debug::put( 'Loader::Err404 happened!<br />' );
     }
     // +-------------------------------------------------------------+
 }
