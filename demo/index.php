@@ -18,7 +18,7 @@ $dispatch
     ->addModel( 'Viewer', 'view' )
 ;
 
-$dispatch->dispatch('default', $data );
+$dispatch->dispatch( $dispatch->defaultAct(), $data );
 
 
 
