@@ -83,6 +83,17 @@ class Dispatch
     }
     // +-------------------------------------------------------------+
     /**
+     * prepend a model to models.
+     * @param $model       model.
+     * @param null $name   name of the model.
+     * @return Dispatch    returns this.
+     */
+    function prependModel( $model, $name=NULL ) {
+        $this->models = array( $model, $name ) + $this->models;
+        return $this;
+    }
+    // +-------------------------------------------------------------+
+    /**
      * use next model. for instance, the models can be: auth,
      * cache, data model, and view.
      * @param null $nextAct
@@ -98,7 +109,7 @@ class Dispatch
             $this->models = array_slice( $this->models, 1 );
             // sets next action for the next model.
             if( $nextAct === NULL ) {
-                $nextAct = $this->nextAct( $this->currAct() );
+                $nextAct = $this->currAct( $this->currAct() );
             }
             else {
                 $this->nextAct( $nextAct );
@@ -186,11 +197,11 @@ class Dispatch
         // set current action.
         $return = NULL;
         $this->dispatchAct = $action;
-        $this->currAct( $action );
         // -----------------------------
         // chain of responsibility loop.
         while( $action  )
         {
+            $this->currAct( $action );
             $this->nextAct( FALSE ); // reset next action.
             $return = $this->execAction( $action, $data );
             $action = $this->nextAct();
@@ -245,6 +256,7 @@ class Dispatch
      * @return bool
      */
     function loadModel( $model ) {
+        if( is_object( $model ) ) return TRUE;
         if( class_exists( $model, FALSE ) ) return TRUE;
         if( file_exists( $model.'.php' ) ) {
             /** @define "string" "model, class name" */
