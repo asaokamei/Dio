@@ -11,17 +11,14 @@ class Loader extends CenaDta\App\Loader {}
 Loader::setLocation( __DIR__ );
 class Viewer extends CenaDta\App\Viewer {}
 
+$data = array();
 $dispatch = new Dispatch();
 $dispatch
     ->addModel( 'Loader', 'load' )
     ->addModel( 'Viewer', 'view' )
 ;
 
-$router = new Router();
-$routes = $router->getRoute();
-Debug::t1( $routes );
-
-$router->dispatch( $dispatch, $routes );
+$dispatch->dispatch('default', $data );
 
 
 

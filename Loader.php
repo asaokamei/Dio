@@ -22,18 +22,30 @@ class Loader
         return static::$location;
     }
     // +-------------------------------------------------------------+
+    static function actionDefault( $ctrl, &$requests ) {
+        // load by searching routes.
+        $routes = Router::getRoute();
+        $file_name = self::searchRoutes( $routes );
+        if( $file_name ) {
+            include $file_name;
+        }
+        else {
+            $ctrl->nextAct( 'Err404' );
+        }
+    }
+    // +-------------------------------------------------------------+
     /**
      * loads application based on folder structure.
      * say, uri is 'action/action2/...', this loader looks for
      * app.php, action.php, first. if not found, searches for
      * action/app.php, then action/action2.php.
      * @param $ctrl
-     * @param $requests
-     * @return bool        TRUE if app found, FALSE if not found.
+     * @param $routes                   route to search for.
+     * @return bool|string $file_name   search file name, or FALSE if not found..
      */
-    function actionDefault( $ctrl, &$requests ) {
+    function searchRoutes( &$routes ) {
         // loads from existing app file.
-        $action = $requests[0];
+        $action = $routes[0];
         if( self::$postfix === NULL ) {
             $extension = '.php';
         }
@@ -41,33 +53,28 @@ class Loader
             $extension = '_' . self::$postfix . '.php';
         }
         $prefix = self::$prefix;
-        \Debug::w1( "Loader::actionDefault(), action={$action}, location=".static::$location );
+        \Debug::w1( "Loader::searchRoutes(), action={$action}, location=".static::$location );
 
         // load application.
 
         // try loading action.php script.
         $file_name = static::$location . "/{$action}{$extension}";
         if( file_exists( $file_name ) ) {
-            include( $file_name );
-            return TRUE;
+            $routes = array_slice( $routes, 1 );
+            return $file_name;
         }
         // try load in subsequent action folder.
         $folder = static::$location . "/{$action}";
-        if( is_dir( $folder ) && !empty( $requests ) ) {
-            $sub_req = array_slice( $requests, 1 );
+        if( is_dir( $folder ) && !empty( $routes ) ) {
+            $routes = array_slice( $routes, 1 );
             self::$location = $folder;
-            if( self::actionDefault( $ctrl, $sub_req ) ) {
-                // successfully loaded something in subsequent folder.
-                return TRUE;
-            }
+            return self::searchRoutes( $routes );
         }
         // try loading ./app.php
         $file_name = static::$location . "/{$prefix}app{$extension}";
         if( file_exists( $file_name ) ) {
-            include( $file_name );
-            return TRUE;
+            return $file_name;
         }
-        $ctrl->nextAct( 'Err404' );
         return FALSE;
     }
     // +-------------------------------------------------------------+
