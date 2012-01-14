@@ -32,7 +32,6 @@ class Loader
      * @return bool        TRUE if app found, FALSE if not found.
      */
     function actionDefault( $ctrl, &$requests ) {
-        \Debug::w1( "Loader::actionDefault(), location=".static::$location );
         // loads from existing app file.
         $action = $requests[0];
         if( self::$postfix === NULL ) {
@@ -42,26 +41,31 @@ class Loader
             $extension = '_' . self::$postfix . '.php';
         }
         $prefix = self::$prefix;
+        \Debug::w1( "Loader::actionDefault(), action={$action}, location=".static::$location );
 
         // load application.
 
-        // try loading action/app.php
-        $file_name = static::$location . "/{$prefix}app{$extension}";
-        if( file_exists( $file_name ) ) {
-            include( $file_name );
-            return TRUE;
-        }
         // try loading action.php script.
         $file_name = static::$location . "/{$action}{$extension}";
         if( file_exists( $file_name ) ) {
             include( $file_name );
             return TRUE;
         }
-        // try load in subsequent folder.
+        // try load in subsequent action folder.
         $folder = static::$location . "/{$action}";
-        if( is_dir( $folder ) ) {
+        if( is_dir( $folder ) && !empty( $requests ) ) {
             $sub_req = array_slice( $requests, 1 );
-            return self::actionDefault( $ctrl, $sub_req );
+            self::$location = $folder;
+            if( self::actionDefault( $ctrl, $sub_req ) ) {
+                // successfully loaded something in subsequent folder.
+                return TRUE;
+            }
+        }
+        // try loading ./app.php
+        $file_name = static::$location . "/{$prefix}app{$extension}";
+        if( file_exists( $file_name ) ) {
+            include( $file_name );
+            return TRUE;
         }
         $ctrl->nextAct( 'Err404' );
         return FALSE;
