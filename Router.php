@@ -15,7 +15,7 @@ class Router
      * @param array $requests   set routes.
      */
     function __construct( $requests=array() ) {
-        if( empty( $requests ) ) {
+        if( !empty( $requests ) ) {
             $this->requests = $requests;
         }
         else {
@@ -24,9 +24,12 @@ class Router
     }
     // +-------------------------------------------------------------+
     /**
+     * @param null $uri
+     * @param null $script
      * @return array     returns routes.
      */
     function routeUri( $uri=NULL, $script=NULL ) {
+        Debug::w1( "routeUri( $uri, $script )" );
         if( $uri === NULL ) {
             $uri = preg_replace('@[\/]{2,}@', '/', $_SERVER[ 'REQUEST_URI' ] );
             $uri = explode( '/', $uri );
@@ -34,12 +37,14 @@ class Router
         if( $script === NULL ) {
             $script = explode( '/', $_SERVER[ 'SCRIPT_NAME' ] );
         }
-        for( $i= 0; $i < sizeof( $script ); $i++ ) {
+        Debug::t5( $uri, 'uri array' );
+        Debug::t5( $script, 'script array' );
+        for( $i = 0; $i < sizeof( $script ); $i++ ) {
             if( $uri[$i] == $script[$i] ) {
-                array_slice( $uri, 1 );
+                unset( $uri[$i] );
             }
         }
-        return $uri;
+        return array_values( $uri );
     }
     // +-------------------------------------------------------------+
     function dispatch( $dispatcher ) {
@@ -48,42 +53,4 @@ class Router
     // +-------------------------------------------------------------+
 }
 
-
-class simpleLoader
-{
-    static $location;
-    static $postfix = '';
-    // +-------------------------------------------------------------+
-    function actionDefault( $ctrl, $requests ) {
-        // loads from existing app file.
-        $action = $requests[0];
-        $extetion = '_' . self::$postfix . '.php';
-        if( file_exists( "{$action}.php" ) ) {
-            include( "{$action}{$extetion}" );
-        }
-        else
-        if( file_exists( "{$action}/app.php" ) ) {
-            include( "{$action}/app{$extetion}" );
-        }
-        $ctrl->nextAct( 'Err404' );
-    }
-    // +-------------------------------------------------------------+
-    function actionErr404( $ctrl, $data ) {
-        // do something about error 404, a file not found.
-    }
-    // +-------------------------------------------------------------+
-}
-
-class simpleView
-{
-    function actionDefault( $ctrl, $data ) {
-        // everything OK.
-    }
-    function actionErr404( $ctrl, $data ) {
-        // show some excuses, or blame user for not finding a page.
-    }
-    function actionException( $ctrl, $data ) {
-        // show some nasty things happened and apologize.
-    }
-}
 
