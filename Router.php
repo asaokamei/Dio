@@ -19,7 +19,7 @@ class Router
             $this->requests = $requests;
         }
         else {
-            $this->requests = $this->routeUri();
+            $this->requests = $this->getRoute();
         }
     }
     // +-------------------------------------------------------------+
@@ -28,8 +28,8 @@ class Router
      * @param null $script
      * @return array     returns routes.
      */
-    function routeUri( $uri=NULL, $script=NULL ) {
-        Debug::w1( "routeUri( $uri, $script )" );
+    function getRoute( $uri=NULL, $script=NULL ) {
+        Debug::w1( "getRoute( $uri, $script )" );
         if( $uri === NULL ) {
             $uri = preg_replace('@[\/]{2,}@', '/', $_SERVER[ 'REQUEST_URI' ] );
             $uri = explode( '/', $uri );
@@ -47,8 +47,8 @@ class Router
         return array_values( $uri );
     }
     // +-------------------------------------------------------------+
-    function dispatch( $dispatcher ) {
-        $dispatcher->dispatch( $this->requests[0], $this->requests );
+    function dispatch( $dispatcher, &$data ) {
+        $dispatcher->dispatch( $this->requests[0], $data );
     }
     // +-------------------------------------------------------------+
 }

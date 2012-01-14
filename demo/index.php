@@ -17,10 +17,11 @@ $dispatch
     ->addModel( 'Viewer', 'view' )
 ;
 
-$route = new Router();
-Debug::t1( $route->requests );
+$router = new Router();
+$routes = $router->getRoute();
+Debug::t1( $routes );
 
-$route->dispatch( $dispatch );
+$router->dispatch( $dispatch, $routes );
 
 
 
