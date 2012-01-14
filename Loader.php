@@ -24,7 +24,7 @@ class Loader
     // +-------------------------------------------------------------+
     static function actionDefault( $ctrl, &$requests ) {
         // load by searching routes.
-        $routes = Router::getRoute();
+        $routes = self::getRoute();
         $file_name = self::searchRoutes( $routes );
         if( $file_name ) {
             include $file_name;
@@ -44,11 +44,10 @@ class Loader
      * say, uri is 'action/action2/...', this loader looks for
      * app.php, action.php, first. if not found, searches for
      * action/app.php, then action/action2.php.
-     * @param $ctrl
      * @param $routes                   route to search for.
      * @return bool|string $file_name   search file name, or FALSE if not found..
      */
-    function searchRoutes( &$routes ) {
+    static function searchRoutes( &$routes ) {
         // loads from existing app file.
         $action = $routes[0];
         if( self::$postfix === NULL ) {
@@ -81,6 +80,27 @@ class Loader
             return $file_name;
         }
         return FALSE;
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * gets routes array. override this method to use other Router.
+     * @static
+     * @return array    routes.
+     */
+    static function getRoute() {
+        return Router::getRoute();
+    }
+    // +-------------------------------------------------------------+
+    /**
+     * search maps to find file to load.
+     * this should be much faster than searchRoutes because there
+     * are no file system access.
+     * not implemented!!!
+     * @static
+     * @param $routes
+     */
+    static function searchMaps( $routes ) {
+        // not implemented.
     }
     // +-------------------------------------------------------------+
 }

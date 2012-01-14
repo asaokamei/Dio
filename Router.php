@@ -12,7 +12,7 @@ class Router
      * @param null $script
      * @return array     returns routes.
      */
-    function getRoute( $uri=NULL, $script=NULL ) {
+    static function getRoute( $uri=NULL, $script=NULL ) {
         \Debug::w1( "getRoute( $uri, $script )" );
         if( $uri === NULL ) {
             $uri = preg_replace('@[\/]{2,}@', '/', $_SERVER[ 'REQUEST_URI' ] );
