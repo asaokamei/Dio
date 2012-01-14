@@ -36,23 +36,23 @@ class Loader
         // loads from existing app file.
         $action = $requests[0];
         if( self::$postfix === NULL ) {
-            $extetion = '.php';
+            $extension = '.php';
         }
         else {
-            $extetion = '_' . self::$postfix . '.php';
+            $extension = '_' . self::$postfix . '.php';
         }
         $prefix = self::$prefix;
 
         // load application.
 
         // try loading action/app.php
-        $file_name = static::$location . "/{$prefix}app{$extetion}";
+        $file_name = static::$location . "/{$prefix}app{$extension}";
         if( file_exists( $file_name ) ) {
             include( $file_name );
             return TRUE;
         }
         // try loading action.php script.
-        $file_name = static::$location . "/{$action}{$extetion}";
+        $file_name = static::$location . "/{$action}{$extension}";
         if( file_exists( $file_name ) ) {
             include( $file_name );
             return TRUE;
@@ -64,7 +64,7 @@ class Loader
             return self::actionDefault( $ctrl, $sub_req );
         }
         $ctrl->nextAct( 'Err404' );
-        return;
+        return FALSE;
     }
     // +-------------------------------------------------------------+
     function actionErr404( $ctrl, $data ) {
