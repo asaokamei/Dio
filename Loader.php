@@ -25,8 +25,9 @@ class Loader
     static function actionDefault( $ctrl, &$requests ) {
         // load by searching routes.
         $routes = self::getRoute();
-        $file_name = self::searchRoutes( $routes );
+        $file_name = self::searchRoutes( $routes, $action );
         if( $file_name ) {
+            $ctrl->nextModel( $action );
             include $file_name;
         }
         else {
@@ -47,7 +48,7 @@ class Loader
      * @param $routes                   route to search for.
      * @return bool|string $file_name   search file name, or FALSE if not found..
      */
-    static function searchRoutes( &$routes ) {
+    static function searchRoutes( &$routes, &$action ) {
         // loads from existing app file.
         $action = $routes[0];
         if( self::$postfix === NULL ) {
@@ -72,11 +73,12 @@ class Loader
         if( is_dir( $folder ) && !empty( $routes ) ) {
             $routes = array_slice( $routes, 1 );
             self::$location = $folder;
-            return self::searchRoutes( $routes );
+            return self::searchRoutes( $routes, $action );
         }
         // try loading ./app.php
         $file_name = static::$location . "/{$prefix}app{$extension}";
         if( file_exists( $file_name ) ) {
+            $action = $routes[0];
             return $file_name;
         }
         return FALSE;
