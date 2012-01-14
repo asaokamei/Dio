@@ -27,8 +27,8 @@ class Loader
         $routes = self::getRoute();
         $file_name = self::searchRoutes( $routes, $action );
         if( $file_name ) {
-            $ctrl->nextModel( $action );
             include $file_name;
+            $ctrl->nextModel( $action );
         }
         else {
             $ctrl->nextAct( 'Err404' );

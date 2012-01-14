@@ -89,7 +89,7 @@ class Dispatch
      * @return Dispatch    returns this.
      */
     function prependModel( $model, $name=NULL ) {
-        $this->models = array( $model, $name ) + $this->models;
+        $this->models = array_merge( array( array( $model, $name ) ), $this->models );
         return $this;
     }
     // +-------------------------------------------------------------+
