@@ -50,7 +50,7 @@ class Loader
      */
     static function searchRoutes( &$routes, &$action ) {
         // loads from existing app file.
-        $action = $routes[0];
+        $action = self::getAction( $routes[0] );
         if( self::$postfix === NULL ) {
             $extension = '.php';
         }
@@ -78,10 +78,16 @@ class Loader
         // try loading ./app.php
         $file_name = static::$location . "/{$prefix}app{$extension}";
         if( file_exists( $file_name ) ) {
-            $action = $routes[0];
+            $action = self::getAction( $routes[0] );
             return $file_name;
         }
         return FALSE;
+    }
+    // +-------------------------------------------------------------+
+    static function getAction( $string ) {
+        if( is_array( $string ) ) $string = $string[0];
+        $action = preg_replace( '/[^_a-zA-Z0-9]/m', '', $string );
+        return $action;
     }
     // +-------------------------------------------------------------+
     /**
